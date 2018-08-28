@@ -1,5 +1,4 @@
-﻿# Esta versión hace exactamente lo mismo que k-means0; en vez de transformar cada uno de los valores a texto y viceversa utiliza la librería numpy
-# Obtuvo un tiempo record de 0.008729 segundos en converger.
+﻿# Hasta el momento ya se le aplicó la normalización a los términos, sigue teniendo un comportamiento lineal en vez de marcar curvas.
 
 from random import choice as ch
 import numpy as np
@@ -30,13 +29,12 @@ def datos(archivo):
     for a in range(len(lines)):
         semanas[a][6]=semanas[a][6][:-1] #elimina el caractér de salto de linea.
         semanas[a] = [int(l) for l in semanas[a]] #hace número cada uno de los valores de la lista
-    #semanas = [[semanas[a][b] for a in range(len(semanas))] for b in range(len(semanas[0]))] #este procedimiento toma los 104 valores en vez de la agrupación de 7 de estos.
     sem = [a[b] for a in [semanas[a:a+7]  for a in range(len(semanas)-7)] for b in range(7)] #toma de 7 en 7 conjuntos de datos y los hace una sola matriz
     sem = np.array(sem) #se hace un arreglo (en forma de matriz) de sem en numpy
     return (sem)
 
 def grupos(semanas, inercia1, inercia2):
-    # En base a las inercias entre los puntos y las semanas elige en que grupo deberìa estar cada uno de los datos. 
+    # En base a las inercias entre los puntos y las semanas elige en que grupo debería estar cada uno de los datos. 
     # Por el momento solo le es posible comparar entre dos grupos.
     grupo = np.array([semanas[l] for l in range(len(inercia1)) if inercia1[l] < inercia2[l]]) 
     return (grupo)
@@ -47,7 +45,22 @@ def puntos(grupo):
     punto = grupo.sum(axis=0)/len(grupo)
     return (punto)
 
+
+ 
 semanas = datos("moda2.csv")
+    ###promedio_semanal = np.array([l.sum() for l in semanas])/len(semanas[0]) #saca el promedio de cada semana
+
+#promedio_semanal = semanas.sum(axis=1)/len(semanas[0]) #tambien calcula el promedio semanal, pero lo hace utilizando numpy
+#std_dev_semanal = semanas.std(axis=1) # calcula la desviación estandar semanal
+#semanas = np.array([(semanas[:,l]-promedio_semanal)/std_dev_semanal for l in range(len(semanas[0]))]).T #hace un ciclo para restar a cada columna el promedio semanal y dividirlo entre la desviación estandar
+
+n = np.ones((len(semanas[0]),1))   
+promedio_semanal = np.array(semanas.sum(axis=1)/len(semanas[0]))*n #calcula el promedio semanal, multiplica el vector por la cant. de columnas (para poder restar matrices.)
+std_dev_semanal = np.array(semanas.std(axis=1))*n # calcula la desviación estandar semanal, multiplica el vector por la cant. de columnas (para poder restar matrices.)
+semanas = (semanas.T - promedio_semanal) / std_dev_semanal #normaliza cada fila.
+
+
+
 
 punto1 = ch(semanas)
 punto2 = ch(semanas)
