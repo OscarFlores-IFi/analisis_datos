@@ -33,7 +33,7 @@ def calc_centroides(grupos,k):
 def k_means(clusters):
     k = np.ones(clusters)    
         
-    semanas = datos("moda2.csv").T
+    semanas = datos("AC.csv").T
     rand = np.random.randint(len(semanas), size=len(k))
     centroides = [semanas[l] for l in rand]
     
