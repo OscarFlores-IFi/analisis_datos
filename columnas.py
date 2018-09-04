@@ -16,6 +16,11 @@ def datos(archivo, columnas):
         for k in np.arange(columnas): 
             en_blanco[:,k] = columna[k:n-columnas+k] #se rellenan los datos vacíos con los originales.
         file2.append(en_blanco) #se escriben las funciones
-    return(file2)
-file = datos('AC.csv',5)
+    file3 = np.concatenate(file2[0:6], axis=1) #Se concatenan en el eje'x' los 6 arreglos.
+    return(file3)
+    
+archivo = 'AC.csv'
+file = datos(archivo, 5)
 print(file)
+file2 = pd.DataFrame(data=file)
+file2.to_csv('columnas' + archivo)
