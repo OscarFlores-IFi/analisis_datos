@@ -16,6 +16,8 @@ def datos(archivo, columnas):
         for k in np.arange(columnas): 
             en_blanco[:,k] = columna[k:n-columnas+k] #se rellenan los datos vacíos con los originales.
         file2.append(en_blanco) #se escriben las funciones
+    for i in range(len(file2)):
+    	file2[i]=((file2[i].T - np.mean(file2[i],axis=1))/np.std(file2[i],axis=1)).T
     file3 = np.concatenate(file2[0:6], axis=1) #Se concatenan en el eje'x' los 6 arreglos.
     return(file3)
     
