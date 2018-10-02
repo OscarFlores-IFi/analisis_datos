@@ -28,14 +28,16 @@ volume = datos("VolumeAC.csv")
 #%%
 
 ### Se ejecuta el algoritmo de k-means en los datos. Posteriormente se guardan los resultados en listas. 
-DAT = close
+DAT = volume ### modificar este para cambiar de archivo a analizar.
 
 
-x = 10
+x = 10 ### modificar este para evaluar los datos con n centroides. 
+
 centroides,grupos,total_inercia = [],[],[]
 for i in range(1,x+1):
     k_values = cluster(DAT, i)
-    centroides.append(k_values[0])
+    
+    centroides.append(k_values[0]) #almacenar datos en listas. 
     grupos.append(k_values[1])
     total_inercia.append(k_values[2])
 
@@ -60,4 +62,33 @@ for i in range(len(centroides[cen - 1])):
     plt.plot(centroides[cen - 1][i],label=('centroide %i'%i))
 #plt.legend(loc='best')
 plt.show()
+
+#%%
+### da nombre a cada una de los casos en las que se encuentran. Previo a hacer la tabla de probabilidades de Markov.
+
+Cl,Vo = cluster(close,4)[1],cluster(volume,2)[1] #se decidió tomar 4 centroides para cierre y 2 para volumen.
+
+Gr = [[Cl[i],Vo[i]] for i in range(len(Cl))] #se agrupa cada uno de los casos de cierre y volumen en una lista. 
+Dic = [[i,j] for i in range(len(pd.value_counts(Cl))) for j in range(len(pd.value_counts(Vo)))] #se hace un diccionario de las combinaciones existentes en estos dos casos. 
+
+n_g = np.zeros(len(Cl)) #lista en blanco dónde se escribirá cada combinación según sea el caso. 
+for j in range(len(Dic)): 
+    for i in range(len(Gr)):
+        if Dic[j] == Gr[i]:
+            n_g[i] = j
+
+#%%
+
+### Matriz de Probabilidades de Markov. 
+Tam = len(pd.value_counts(n_g)) #Tamaño de la matriz cuadrada.
+N = np.zeros((Tam,Tam))         
+
+for i in range(Tam):
+    for j in range(Tam):
+        for k in range(len(n_g)-1):
+            if n_g[k+1]==j and n_g[k]==i:
+                N[i][j] += 1
+
+print(N)
+
 
