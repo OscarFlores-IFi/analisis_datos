@@ -1,10 +1,11 @@
-#El algoritmo importa un archivo.csv, encuentra de 1 a 10 centroides y almacena los datos en listas.
-# Sigue con error de no converger en algunas situaciones. como resultado arroja un NaN en total_inercia.
+#Se utiliza el algoritmo de clustering de sci-kit-learn. 
+
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from math import ceil,sqrt
+from sklearn.cluster import KMeans
 
 def datos(archivo):
     ### extraer los datos ###
@@ -13,80 +14,50 @@ def datos(archivo):
     datos = datos.values
     return (datos)
 
+def cluster(datos, clusters):
+    model = KMeans(n_clusters=clusters) # sci_kit_learn tiene un algoritmo de clustering en dónde solamente necesita especificarse el número de 
+    model = model.fit(datos)
+    return(model.cluster_centers_, model.predict(datos), model.inertia_)
+
+
     
-def calc_inercias(semanas,centroides,k):
-    inercias = [np.sqrt(((semanas-centroides[l])**2).sum(axis=1)) for l in range(len(k))]
-    return(inercias)
+close = datos("CloseAC.csv") #se sacan los datos de cierre y volumen para trabajar con ellos. 
+volume = datos("VolumeAC.csv")
 
-def calc_grupos(semanas,inercias,k):
-    minimos = np.argmin(inercias,axis=0)
-    grupos = [semanas[minimos==l] for l in range(len(k))]
-    return(grupos)
-
-def calc_centroides(grupos,k):
-    centroides = [grupos[l].sum(axis=0)/len(grupos[l]) for l in range(len(k))]
-    return(centroides)
-
-def k_means(archivo, clusters):
-    k = np.ones(clusters)    
-        
-    semanas = datos(archivo)
-    rand = np.random.randint(len(semanas), size=len(k))
-    centroides = [semanas[l] for l in rand]
-    
-    m = 0
-    cont = 0
-    total_inercia = 1
-    
-    while m != total_inercia and cont <= 20:
-        cont += 1
-        inercias = calc_inercias(semanas,centroides,k)      
-        grupos = calc_grupos(semanas,inercias,k)
-        centroides = calc_centroides(grupos,k)
-        
-        m = total_inercia
-        total_inercia = np.min(inercias,axis=0).sum()
-        print(total_inercia)
-    return(semanas,centroides,grupos,inercias,total_inercia)
-
-
+###############################################################################
+#%%
 
 ### Se ejecuta el algoritmo de k-means en los datos. Posteriormente se guardan los resultados en listas. 
-    
-#archivo  = "normalizadoAC.csv"
-archivo = "open_closeAC.csv"
-#archivo = "close_volumeAC.csv"
+DAT = close
 
 
 x = 10
-
-semanas,centroides,grupos,inercias,total_inercia = [],[],[],[],[]
+centroides,grupos,total_inercia = [],[],[]
 for i in range(1,x+1):
-    print('\n Total_inercia con %i centroides'%i)
-    k_values = k_means(archivo, i)
-    semanas.append(k_values[0])
-    centroides.append(k_values[1])
-    grupos.append(k_values[2])
-    inercias.append(k_values[3])
-    total_inercia.append(k_values[4])
-    
+    k_values = cluster(DAT, i)
+    centroides.append(k_values[0])
+    grupos.append(k_values[1])
+    total_inercia.append(k_values[2])
 
+#%%
+dif_inercia = [total_inercia[i] - total_inercia[i+1] for i in range(len(total_inercia)-1)] #grafica la diferencia entre cada una de las inercias. sirve para encontrar el "codo".
+    
 ### se grafican las inercias globales (total_inercia) para conocer el 'codo'  
 plt.plot(np.arange(1,len(total_inercia)+1),total_inercia)
+plt.plot(np.arange(2,len(total_inercia)+1),dif_inercia)
 plt.xlabel('iteraciones')
 plt.ylabel('inercia global')
 plt.grid()
 plt.show()
 
-### se grafican los centroides. 
-cen = 10
 
+#%%
+### se grafican los centroides. 
+cen = 4  ### modificar este para graficar n clusters. 
 for i in range(len(centroides[cen - 1])):
     plt.subplot(ceil(sqrt(cen)),round(sqrt(cen)),i+1)
     plt.grid()
     plt.plot(centroides[cen - 1][i],label=('centroide %i'%i))
 #plt.legend(loc='best')
 plt.show()
-
-
 
