@@ -13,14 +13,14 @@ def datos(archivo, columnas, nombre_columna):
     en_blanco = np.zeros((n-columnas,columnas))
     for k in np.arange(columnas): 
         en_blanco[:,k] = Col[k:n-columnas+k] #se rellenan los datos vacíos con los originales.
-    en_blanco=((en_blanco.T - np.mean(en_blanco,axis=1))/np.std(en_blanco,axis=1)).T # se trasponen debido a que numpy acepta únicamente operaciones matriciales-vectoriales en columnas.
+    en_blanco=((en_blanco.T - np.mean(en_blanco,axis=1))/np.std(en_blanco,axis=1)).T # normalizar
+#    en_blanco=((en_blanco.T - np.mean(en_blanco,axis=1))).T # restar promedio 
     return(en_blanco)
     
 archivo = 'AC.csv'
 nombre_columna = 'Close'
 #nombre_columna = 'Volume'
-close = datos(archivo, 5, nombre_columna)
-print(file)
+file = datos(archivo, 5, nombre_columna)
 file2 = pd.DataFrame(data=file)
 file2.to_csv(nombre_columna + archivo)
 
