@@ -23,12 +23,13 @@ def cluster(datos, clusters):
     
 close = datos("CloseAC.csv") #se sacan los datos de cierre y volumen para trabajar con ellos. 
 volume = datos("VolumeAC.csv")
+magnitud = datos("M_VolumeAC.csv")
 
 ###############################################################################
 #%%
 
 ### Se ejecuta el algoritmo de k-means en los datos. Posteriormente se guardan los resultados en listas. 
-DAT = volume ### modificar este para cambiar de archivo a analizar.
+DAT = close ### modificar este para cambiar de archivo a analizar.
 
 
 x = 10 ### modificar este para evaluar los datos con n centroides. 
@@ -66,7 +67,7 @@ plt.show()
 #%%
 ### da nombre a cada una de los casos en las que se encuentran. Previo a hacer la tabla de probabilidades de Markov.
 
-Cl,Vo = cluster(close,4)[1],cluster(volume,2)[1] #se decidió tomar 4 centroides para cierre y 2 para volumen.
+Cl,Vo = cluster(close,4)[1],cluster(volume,5)[1] #se decidió tomar 4 centroides para cierre y 2 para volumen.
 
 Gr = [[Cl[i],Vo[i]] for i in range(len(Cl))] #se agrupa cada uno de los casos de cierre y volumen en una lista. 
 Dic = [[i,j] for i in range(len(pd.value_counts(Cl))) for j in range(len(pd.value_counts(Vo)))] #se hace un diccionario de las combinaciones existentes en estos dos casos. 
@@ -91,4 +92,15 @@ for i in range(Tam):
 
 print(N)
 
+#%%
+V = np.zeros((1,len(Dic))) # V es el vector que determinará la situación actual. con este  se podrán tomar decisiones basadas en la tabla de probabilidades de Markov.
+V[0][int(n_g[-1])] = 1
+NV = (V*N).sum(axis=1)
+
+print(NV) # Devuelve la situación actual expresada en un vector. 
+
+#%%
+Dec = len(Dic)/len(pd.value_counts(Cl))
+for i in range(int(len(Dic)/len(pd.value_counts(Vo)))):
+    print (NV[int(i*Dec):int((i+1)*Dec)]) ##Grupos de decisiones a tomar; si sube o baja se toma decisión, sino no se hace nada. 
 

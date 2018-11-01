@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 #se importan datos de un archivo .csv y se divide en n columnas cada una de las columnas originales. 
-#se normalizan los datos y posteriormente se exportan a un archivo .csv 
+#s posteriormente se exportan a un archivo .csv 
 
 import numpy as np
 import pandas as pd
@@ -13,14 +13,14 @@ def datos(archivo, columnas, nombre_columna):
     en_blanco = np.zeros((n-columnas,columnas))
     for k in np.arange(columnas): 
         en_blanco[:,k] = Col[k:n-columnas+k] #se rellenan los datos vacíos con los originales.
-    en_blanco=((en_blanco.T - np.mean(en_blanco,axis=1))/np.std(en_blanco,axis=1)).T # normalizar
+#    en_blanco=((en_blanco.T - np.mean(en_blanco,axis=1))/np.std(en_blanco,axis=1)).T # normalizar
 #    en_blanco=((en_blanco.T - np.mean(en_blanco,axis=1))).T # restar promedio 
-    return(en_blanco)
+    magnitud = (np.max(en_blanco, axis=1)-np.min(en_blanco, axis=1))/np.mean(en_blanco, axis=1)
+    return(magnitud)
     
 archivo = 'AC.csv'
-#nombre_columna = 'Close'
 nombre_columna = 'Volume'
 file = datos(archivo, 5, nombre_columna)
 file2 = pd.DataFrame(data=file)
-file2.to_csv(nombre_columna + archivo)
+file2.to_csv('M_' + nombre_columna + archivo)
 
