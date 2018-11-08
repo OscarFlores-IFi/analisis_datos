@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import pickle
 
 def compra(acciones, dinero, precio, cantidad, comision, historial):
     historial.append((cantidad, precio, precio*cantidad,dinero+acciones*precio))
@@ -11,6 +11,11 @@ def venta(acciones, dinero, precio, cantidad, comision, historial):
     historial.append((-cantidad, precio, -precio*cantidad,dinero+acciones*precio))
     return acciones - cantidad, dinero+(precio*cantidad)*(1-comision)
 
+
+################### se importaron los modelos de k-means, falta integrarlos en la simulación con la toma de decisiones. 
+close_model = pickle.load(open('close_model.sav', 'rb'))
+volume_model = pickle.load(open('volume_model.sav', 'rb'))
+###################
 
 cierre = pd.read_csv('AC.csv')['Close']
 

@@ -28,6 +28,16 @@ magnitud = datos("M_VolumeAC.csv")
 
 ###############################################################################
 #%%
+### exportar modelos de k-means a archivo .sav
+close_model = KMeans(n_clusters=4).fit(close)
+pickle.dump(close_model, open('close_model.sav', 'wb'))
+
+volume_model = KMeans(n_clusters=5).fit(volume)
+pickle.dump(close_model, open('volume_model.sav', 'wb'))
+
+
+
+#%%
 
 ### Se ejecuta el algoritmo de k-means en los datos. Posteriormente se guardan los resultados en listas. 
 DAT = close ### modificar este para cambiar de archivo a analizar.
