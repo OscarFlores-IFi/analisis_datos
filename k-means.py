@@ -29,14 +29,13 @@ magnitud = datos("M_VolumeAC.csv")
 ###############################################################################
 #%%
 ### exportar modelos de k-means a archivo .sav
-close_model = KMeans(n_clusters=4).fit(close)
+close_model = KMeans(n_clusters=4)
+close_model = close_model.fit(close)
 pickle.dump(close_model, open('close_model.sav', 'wb'))
 
-volume_model = KMeans(n_clusters=5).fit(volume)
-pickle.dump(close_model, open('volume_model.sav', 'wb'))
-
-
-
+volume_model = KMeans(n_clusters=5)
+volume_model = volume_model.fit(volume)
+pickle.dump(volume_model, open('volume_model.sav', 'wb'))
 #%%
 
 ### Se ejecuta el algoritmo de k-means en los datos. Posteriormente se guardan los resultados en listas. 
@@ -78,16 +77,17 @@ plt.show()
 #%%
 ### da nombre a cada una de los casos en las que se encuentran. Previo a hacer la tabla de probabilidades de Markov.
 
-Cl,Vo = cluster(close,4)[1],cluster(volume,5)[1] #se decidió tomar 4 centroides para cierre y 2 para volumen.
+Cl,Vo = cluster(close,4)[1],cluster(volume,5)[1] #se decidió tomar 4 centroides para cierre y 5 para volumen.
 
 Gr = [[Cl[i],Vo[i]] for i in range(len(Cl))] #se agrupa cada uno de los casos de cierre y volumen en una lista. 
 Dic = [[i,j] for i in range(len(pd.value_counts(Cl))) for j in range(len(pd.value_counts(Vo)))] #se hace un diccionario de las combinaciones existentes en estos dos casos. 
-
 n_g = np.zeros(len(Cl)) #lista en blanco dónde se escribirá cada combinación según sea el caso. 
 for j in range(len(Dic)): 
     for i in range(len(Gr)):
         if Dic[j] == Gr[i]:
             n_g[i] = j
+
+pickle.dump(Dic, open('Dictionary.sav', 'wb')) # se exporta el diccionario de combinaciones 'Dic'
 
 #%%
 
@@ -101,7 +101,7 @@ for i in range(Tam):
             if n_g[k+1]==j and n_g[k]==i:
                 N[i][j] += 1
 
-print(N)
+pickle.dump(N, open('Markov.sav', 'wb')) # se exporta la matriz de probabilidades de Markov a un archivo .sav
 
 #%%
 V = np.zeros((1,len(Dic))) # V es el vector que determinará la situación actual. con este  se podrán tomar decisiones basadas en la tabla de probabilidades de Markov.
