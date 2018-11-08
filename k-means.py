@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from math import ceil,sqrt
 from sklearn.cluster import KMeans
+import pickle
 
 def datos(archivo):
     ### extraer los datos ###
@@ -94,13 +95,18 @@ print(N)
 
 #%%
 V = np.zeros((1,len(Dic))) # V es el vector que determinará la situación actual. con este  se podrán tomar decisiones basadas en la tabla de probabilidades de Markov.
-V[0][int(n_g[-1])] = 1
+V[0][int(n_g[np.random.randint(0,506)])] = 1 #se calcula el vector de situacion proveniente de las probabilidades de markov
 NV = (V*N).sum(axis=1)
 
 print(NV) # Devuelve la situación actual expresada en un vector. 
 
 #%%
 Dec = len(Dic)/len(pd.value_counts(Cl))
-for i in range(int(len(Dic)/len(pd.value_counts(Vo)))):
-    print (NV[int(i*Dec):int((i+1)*Dec)]) ##Grupos de decisiones a tomar; si sube o baja se toma decisión, sino no se hace nada. 
+matrix = np.zeros((int(len(Dic)/len(pd.value_counts(Vo))), int(Dec))) ##se hace una matriz en blanco de dimension (cierre,volumen)
+for i in range(int(len(Dic)/len(pd.value_counts(Vo)))):  ## se llenan los datos en la matriz
+    matrix[i,:] = NV[int(i*Dec):int((i+1)*Dec)] ##Grupos de decisiones a tomar; si sube o baja se toma decisión, sino no se hace nada. 
+decision = matrix.sum(axis=1) ## reduce la matriz a cuatro opciones (cambios de direccion, sube o baja) cada una de estas esta expresada con un número y una posición para cada caso.
+decision = decision[0]-decision[1] ## En el caso de muestra decision[0] era la probabilidad de que el siguiente patron fuera de subida, decision[1] era la probabilidad de que el siguiente patrón fuera de bajada. Por ello se restan.
+print(decision/matrix.sum()) ## se imprime un número que muestra que tan probable(en escala de 20) es que el siguiente número sea subida
+
 
