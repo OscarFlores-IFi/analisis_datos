@@ -42,12 +42,12 @@ for i in range(len(close)-5):
     for i in range(qc):  ## se llenan los datos en la matriz
         matrix[i,:] = vec[qv*i:(i+1)*qv] ##Grupos de decisiones a tomar; si sube o baja se toma decisión, sino no se hace nada. 
     decision = matrix.sum(axis=1) ## reduce la matriz a cuatro opciones (cambios de direccion, sube o baja) cada una de estas esta expresada con un número y una posición para cada caso.
-    decision = (decision[0]-decision[3])/matrix.sum() ## En el caso de muestra decision[0] era la probabilidad de que el siguiente patron fuera de subida, decision[1] era la probabilidad de que el siguiente patrón fuera de bajada. Por ello se restan.
+    decision = (decision[2]-decision[1])/matrix.sum() ## En el caso de muestra decision[0] era la probabilidad de que el siguiente patron fuera de subida, decision[1] era la probabilidad de que el siguiente patrón fuera de bajada. Por ello se restan.
     Decisiones.append(decision)
     
-    if decision > .6:
+    if decision > .2:
         decision = 1
-    elif decision < -.19: 
+    elif decision < 0: 
         decision = -1
     else: 
         decision = 0
