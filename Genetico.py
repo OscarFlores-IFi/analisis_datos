@@ -20,4 +20,6 @@ for cic in range(200):
     for i in range(10): ## mutamos 5 dígitos de los 10 vectores que tenemos. 
         for i in range(5):
             decisiones[i][np.random.randint(0,25)] = np.random.randint(0,3)-1
-    print(m[0])
+    [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
+
+print(decisiones)
