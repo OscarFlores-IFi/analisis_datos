@@ -1,6 +1,48 @@
+#!/usr/bin/env python
+# -*- coding: ISO-8859-1 -*-
+
 # Algoritmo genético. 
 import numpy as np
+import pickle
+import pandas as pd
 
+def compra(acciones, dinero, precio, cantidad, comision):
+    return acciones+cantidad, dinero-(precio*cantidad)-np.abs(comision*cantidad*precio)
+
+def simulacion(datos, decisiones, clusters):
+    
+    dinero = 1000000
+    comision = 0.0025
+    acciones = 0
+    
+    situacion = [acciones, dinero]  
+    
+    for i in range(len(datos)-5):
+        C = [(close[i:i+5]-close[i:i+5].mean())/close[i:i+5].std()]
+        CP = clusters.predict(C)
+        
+        vec = np.zeros((1,clusters.n_clusters)) # genera un vector de dimensiones 1,20 
+        vec[0][CP] = 1 # el valor indicado será 1 para que al ser multiplicado por la matriz de probabilidades de Markov de la situación. 
+        
+        if vec*decisiones > 0:
+            situacion = compra(situacion[0],situacion[1],close[i+5],1000,comision)
+        elif vec*decisiones < 0: 
+            situacion = compra(situacion[0],situacion[1],close[i+5],1000,comision)
+            
+    return (situacion[1]+close[i+5]*situacion[0]) ## Regresa el balance general
+
+
+###########################
+clusters = pickle.load(open('gen.sav', 'rb'))
+###########################
+
+close = pd.read_csv('AC.csv')['Close'].values ## lee los valores cierre del csv original
+
+dec = np.ones((1,16))
+dinero_final = simulacion(close, dec, clusters)
+
+
+"""
 l_vec = 16
 l_dec = 10
 ### Se otorgan 3 opciones a la toma de decisiones
@@ -24,4 +66,4 @@ for cic in range(200):
             decisiones[i][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
     [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
 
-print(decisiones[-3])
+print(decisiones[-3])"""
