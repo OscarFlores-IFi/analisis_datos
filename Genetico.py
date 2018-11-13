@@ -17,9 +17,9 @@ for cic in range(200):
         m.append(decisiones[a.index(max(a))])
         a.pop(a.index(max(a)))
     
-    m = np.array(m) ## hacemos 10 nuevos vectores derivados únicamente de los 3 mejores anteriores.
+    m = np.array(m) ## hacemos l_vec nuevos vectores derivados únicamente de los 3 mejores anteriores.
     decisiones = [[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(l_dec)]
-    for k in range(l_dec): ## mutamos 5 dígitos de los 10 vectores que tenemos. 
+    for k in range(l_dec): ## mutamos un tercio de los dígitos de los l_vec vectores que tenemos. 
         for i in range(int(l_dec//3)):
             decisiones[i][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
     [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
