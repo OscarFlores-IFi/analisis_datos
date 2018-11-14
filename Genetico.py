@@ -40,22 +40,21 @@ clusters = pickle.load(open('gen.sav', 'rb'))
 
 close = pd.read_csv('AC.csv')['Close'].values ## lee los valores cierre del csv original
 
-dec = np.ones((1,16))
-dinero_final = simulacion(close, dec, clusters)
 
+###############################################################################
+# Se corre la simulación con vectores de decisiones genéticos
 
-"""
 l_vec = 16
 l_dec = 10
 ### Se otorgan 3 opciones a la toma de decisiones
 decisiones = [[np.random.randint(0,3)-1 for i in range(l_vec)] for i in range(l_dec)] # Inicial. 
 
-for cic in range(200):
+for cic in range(20):
     a = []
     m = []
     
     for i in decisiones: ## se suman todos vectores de decisión para escoger el que de la suma mayor
-        a.append(np.sum(i))
+        a.append(simulacion(close,i,clusters))
     
     for i in range(3): ## se escojen los mejores resultados
         m.append(decisiones[a.index(max(a))])
@@ -68,4 +67,4 @@ for cic in range(200):
             decisiones[i][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
     [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
 
-print(decisiones[-3])"""
+print(decisiones[-3])
