@@ -3,6 +3,7 @@
 import numpy as np
 import pickle
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def compra(acciones, dinero, precio, cantidad, comision):
     return acciones+cantidad, dinero-(precio*cantidad)-np.abs(comision*cantidad*precio)
@@ -30,9 +31,8 @@ def simulacion(datos, decisiones, clusters):
         if Val.sum() > 0 and situacion[1] > 0:
             situacion = compra(situacion[0],situacion[1],close[i+5],cant*dinero//close[i+5],comision) ## se compra un porcentaje de la capacidad que se tiene. no permite compras sin dinero. 
         elif Val.sum() < 0 and situacion[0] > 0: 
-            situacion = compra(situacion[0],situacion[1],close[i+5],situacion[0]*cant,comision) ## se vende un porcentaje de las acciones que tiene. no permite ventas en corto.
+            situacion = compra(situacion[0],situacion[1],close[i+5],-situacion[0]*cant,comision) ## se vende un porcentaje de las acciones que tiene. no permite ventas en corto.
     
-    print(situacion[0], situacion[1])
     return (situacion[1]+close[i+5]*situacion[0]) ## Regresa el balance general
 
 
@@ -51,7 +51,7 @@ l_dec = 10
 ### Se otorgan 3 opciones a la toma de decisiones
 decisiones = [[np.random.randint(0,3)-1 for i in range(l_vec)] for i in range(l_dec)] # Inicial. 
 
-for cic in range(1):
+for cic in range(200):
     a = []
     m = []
     
