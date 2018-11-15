@@ -26,11 +26,13 @@ def simulacion(datos, decisiones, clusters):
 
         Val = decisiones*vec
         
-        if Val.sum() > 0:
-            situacion = compra(situacion[0],situacion[1],close[i+5],1000,comision)
-        elif Val.sum() < 0: 
-            situacion = compra(situacion[0],situacion[1],close[i+5],1000,comision)
-            
+        cant = .10 ## para evitar que se compre todo y se venda todo lo que se tiene, se limita a comprar un porcentaje de lo que puede comprar y vender. 
+        if Val.sum() > 0 and situacion[1] > 0:
+            situacion = compra(situacion[0],situacion[1],close[i+5],cant*dinero//close[i+5],comision) ## se compra un porcentaje de la capacidad que se tiene. no permite compras sin dinero. 
+        elif Val.sum() < 0 and situacion[0] > 0: 
+            situacion = compra(situacion[0],situacion[1],close[i+5],situacion[0]*cant,comision) ## se vende un porcentaje de las acciones que tiene. no permite ventas en corto.
+    
+    print(situacion[0], situacion[1])
     return (situacion[1]+close[i+5]*situacion[0]) ## Regresa el balance general
 
 
@@ -49,7 +51,7 @@ l_dec = 10
 ### Se otorgan 3 opciones a la toma de decisiones
 decisiones = [[np.random.randint(0,3)-1 for i in range(l_vec)] for i in range(l_dec)] # Inicial. 
 
-for cic in range(20):
+for cic in range(1):
     a = []
     m = []
     
@@ -67,4 +69,4 @@ for cic in range(20):
             decisiones[i][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
     [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
 
-print(decisiones[-3])
+print(decisiones[-3:])
