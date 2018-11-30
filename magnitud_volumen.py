@@ -15,12 +15,12 @@ def datos(archivo, columnas, nombre_columna):
         en_blanco[:,k] = Col[k:n-columnas+k] #se rellenan los datos vacíos con los originales.
 #    en_blanco=((en_blanco.T - np.mean(en_blanco,axis=1))/np.std(en_blanco,axis=1)).T # normalizar
 #    en_blanco=((en_blanco.T - np.mean(en_blanco,axis=1))).T # restar promedio 
-    magnitud = (np.max(en_blanco, axis=1)-np.min(en_blanco, axis=1))/np.mean(en_blanco, axis=1)
+    magnitud = (en_blanco-en_blanco.mean())/en_blanco.std()
     return(magnitud)
     
 archivo = 'AC.csv'
 nombre_columna = 'Volume'
-file = datos(archivo, 5, nombre_columna)
+file = datos(archivo, 1, nombre_columna)
 file2 = pd.DataFrame(data=file)
 file2.to_csv('M_' + nombre_columna + archivo)
 

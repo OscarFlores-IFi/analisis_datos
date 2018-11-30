@@ -36,10 +36,14 @@ pickle.dump(close_model, open('close_model.sav', 'wb'))
 volume_model = KMeans(n_clusters=5)
 volume_model = volume_model.fit(volume)
 pickle.dump(volume_model, open('volume_model.sav', 'wb'))
+
+magn_model = KMeans(n_clusters=5)
+magn_model = magn_model.fit(magnitud)
+pickle.dump(magn_model, open('magn_model.sav', 'wb'))
 #%%
 
 ### Se ejecuta el algoritmo de k-means en los datos. Posteriormente se guardan los resultados en listas. 
-DAT = close ### modificar este para cambiar de archivo a analizar.
+DAT = magnitud ### modificar este para cambiar de archivo a analizar.
 
 
 x = 10 ### modificar este para evaluar los datos con n centroides. 
@@ -57,7 +61,7 @@ dif_inercia = [total_inercia[i] - total_inercia[i+1] for i in range(len(total_in
     
 ### se grafican las inercias globales (total_inercia) para conocer el 'codo'  
 plt.plot(np.arange(1,len(total_inercia)+1),total_inercia)
-plt.plot(np.arange(2,len(total_inercia)+1),dif_inercia)
+#plt.plot(np.arange(2,len(total_inercia)+1),dif_inercia)
 plt.xlabel('iteraciones')
 plt.ylabel('inercia global')
 plt.grid()
