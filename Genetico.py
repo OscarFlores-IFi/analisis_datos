@@ -46,8 +46,13 @@ def simulacion(datos, decisiones, c_clusters, m_clusters):
 
 
 ###########################
+<<<<<<< HEAD
+#clusters = pickle.load(open('gen.sav', 'rb'))
+clusters = pickle.load(open('close_model.sav', 'rb'))
+=======
 c_clusters = pickle.load(open('close_model.sav', 'rb'))
 m_clusters = pickle.load(open('magn_model.sav', 'rb'))
+>>>>>>> master
 ###########################
 
 datos = pd.read_csv('AC.csv') ## lee los valores cierre del csv original
@@ -56,17 +61,45 @@ datos = pd.read_csv('AC.csv') ## lee los valores cierre del csv original
 ###############################################################################
 # Se corre la simulación con vectores de decisiones genéticos
 
+<<<<<<< HEAD
+l_vec = clusters.n_clusters
+l_dec = 15
+=======
 l_vec = 9
 l_dec = 10
+>>>>>>> master
 ### Se otorgan 3 opciones a la toma de decisiones
 #decisiones = [[np.random.randint(0,3)-1 for i in range(l_vec)] for i in range(l_dec)] # Inicial. 
 decisiones = [[1, 0, 1, 0, 1, 1, 0, 1, 0]]
 
+<<<<<<< HEAD
+
+s = []
+for cic in range(100):
+=======
 for cic in range(1):
+>>>>>>> master
     a = []
     m = []
     
     for i in decisiones: ## se suman todos vectores de decisión para escoger el que de la suma mayor
+<<<<<<< HEAD
+        a.append(simulacion(close,i,clusters))
+    s.append(np.mean(a))
+    
+    for i in range(3): ## se escojen los mejores resultados
+        m.append(decisiones[a.index(max(a))])
+        a.pop(a.index(max(a)))
+    
+    m = np.array(m) ## hacemos l_vec nuevos vectores derivados únicamente de los 3 mejores anteriores.
+    decisiones = [[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(l_dec)]
+    for k in range(l_dec): ## mutamos un tercio de los dígitos de los l_vec vectores que tenemos. 
+        for i in range(int(l_dec//2)):
+            decisiones[i][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
+    [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
+
+plt.plot(np.array(s))
+=======
         plt.plot(simulacion(datos,i,c_clusters,m_clusters))
 #        a.append(simulacion(datos,i,c_clusters,m_clusters))
 #    
@@ -81,4 +114,5 @@ for cic in range(1):
 #            decisiones[i][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
 #    [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
 #    
+>>>>>>> master
 print(decisiones[-3:])

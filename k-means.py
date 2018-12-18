@@ -23,16 +23,21 @@ def cluster(datos, clusters):
 
     
 close = datos("CloseAC.csv") #se sacan los datos de cierre y volumen para trabajar con ellos. 
-volume = datos("VolumeAC.csv")
-magnitud = datos("M_VolumeAC.csv")
+#volume = datos("VolumeAC.csv")
+#magnitud = datos("M_VolumeAC.csv")
 
 ###############################################################################
 #%%
 ### exportar modelos de k-means a archivo .sav
-close_model = KMeans(n_clusters=4)
-close_model = close_model.fit(close)
-pickle.dump(close_model, open('close_model.sav', 'wb'))
+#close_model = KMeans(n_clusters=4)
+#close_model = close_model.fit(close)
+#pickle.dump(close_model, open('close_model.sav', 'wb'))
 
+<<<<<<< HEAD
+#volume_model = KMeans(n_clusters=5)
+#volume_model = volume_model.fit(volume)
+#pickle.dump(volume_model, open('volume_model.sav', 'wb'))
+=======
 volume_model = KMeans(n_clusters=5)
 volume_model = volume_model.fit(volume)
 pickle.dump(volume_model, open('volume_model.sav', 'wb'))
@@ -40,6 +45,7 @@ pickle.dump(volume_model, open('volume_model.sav', 'wb'))
 magn_model = KMeans(n_clusters=5)
 magn_model = magn_model.fit(magnitud)
 pickle.dump(magn_model, open('magn_model.sav', 'wb'))
+>>>>>>> master
 #%%
 
 ### Se ejecuta el algoritmo de k-means en los datos. Posteriormente se guardan los resultados en listas. 

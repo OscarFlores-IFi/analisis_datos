@@ -37,10 +37,10 @@ def yahooKeyStats(stock,start,end):
     
 #%%
     
-stock = ['AC','ALFAA','ALPEKA']
+stock = ['AC','ALFAA','ALPEKA','ALSEA','ELEKTRA','IENOVA','MEXCHEM','OHLMEX','PE&OLES','PINFRA','WALMEX']
 
 today = datetime.date.today()
-days =datetime.timedelta(days=365) #Buscamos 1 año de historia
+days =datetime.timedelta(days=1825) #Buscamos 1 año de historia
 
 timestamp=today-days #Solo es para observar que la fecha sea correcta
 start = int(_time.mktime(today.timetuple())) #fecha inicial
@@ -51,6 +51,9 @@ end= int(_time.mktime(timestamp.timetuple())) #fecha final
 
 for j in stock:
     data=yahooKeyStats(j+'.MX',start,end) #descarga los datos de cada ticker
-    data.to_csv(('%s.csv')%j) #exporta los datos de cada ticker a un csv.
+    try:
+        data.to_csv(('Data/%s.csv')%j) #exporta los datos de cada ticker a un csv.
+    except: 
+        print(j)
     ### exec("data_%s=data" % (j))
     

@@ -18,8 +18,8 @@ def datos(archivo, columnas, nombre_columna):
     return(en_blanco)
     
 archivo = 'AC.csv'
-#nombre_columna = 'Close'
-nombre_columna = 'Volume'
+nombre_columna = 'Close'
+#nombre_columna = 'Volume'
 file = datos(archivo, 5, nombre_columna)
 file2 = pd.DataFrame(data=file)
 file2.to_csv(nombre_columna + archivo)
