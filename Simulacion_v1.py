@@ -38,9 +38,9 @@ p_movil = rel.rolling(dias).mean()
 r1 = 0
 r2 = 180
 
-rel[r1:r2].plot(figsize=(20,5),grid=True)
+rel[dias:r2].plot(figsize=(20,5),grid=True)
 
-p_movil[r1:r2].plot(figsize=(20,5),grid=True)
+p_movil[dias:r2].plot(figsize=(20,5),grid=True)
 #%%
 #close[r1:r2].plot(figsize=(20,5),grid=True)
 data[dias:r2].plot(figsize=(20,5),grid=True)
