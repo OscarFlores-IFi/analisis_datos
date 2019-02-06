@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-import pickle
-import pandas as pd
-import matplotlib.pyplot as plt
 
 ###############################################################################
 # Se corre la simulación con vectores de decisiones genéticos
 
 l_vec = 256 #longitud del vector de toma de decisiones
-l_dec = 128 #Cantidad de vectores de toma de decisiones
+l_dec = 512 #Cantidad de vectores de toma de decisiones
 
 ### Se otorgan 3 opciones a la toma de decisiones
 decisiones = [[np.random.randint(0,3)-1 for i in range(l_vec)] for i in range(l_dec)] # Inicial. 
@@ -37,3 +34,4 @@ for cic in range(100):
     [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
 
 print(decisiones[-5:])
+
