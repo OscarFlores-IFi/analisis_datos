@@ -20,7 +20,7 @@ from sklearn.cluster import KMeans
 
 
 
-data = pd.read_csv('Data/AC.csv', index_col='0')
+data = pd.read_csv('Data/ALFAA.csv', index_col='0')
 #%%
 def crear_ventanas(data,n_ventana):
     n_data = len(data)
@@ -100,7 +100,7 @@ def portafolio_sim(precio,sit,Ud):
     T = np.arange(len(precio))
         
     Vp = np.zeros(T.shape)
-    X  = np.zeros((T.shape[0]+1,2))
+    X  = np.zeros((T.shape[0]+1,2)) 
     u = np.zeros(T.shape)
     X[0][0] = 10000
     rcom = 0.0025
@@ -112,7 +112,7 @@ def portafolio_sim(precio,sit,Ud):
         
         #AC (operacion matricial)
         if Ud[int(sit[t])]>0:
-            u[t] = u_max*Ud[t]
+            u[t] = u_max
         else:
             u[t] = u_min
         
@@ -121,9 +121,25 @@ def portafolio_sim(precio,sit,Ud):
     return T,Vp,X,u
 
 #%% Ejecucion de la funcion de simulacion
-ndata = len(sit)
-precio = data.Close[-ndata:]
-Ud = np.random.randint(-1,2,ndata)
+ndata = int(max(sit))+1
+precio = data.Close[-len(sit):]
+#Ud = np.random.randint(-1,2,ndata)
+Ud = [ 0,  0, -1, -1,  1,  1, -1,  1,  1,  1, -1,  1, -1,  0, -1,  1,  0,
+       -1, -1, -1,  1, -1,  0,  0,  0,  1, -1, -1, -1,  1,  0, -1,  1,  0,
+       -1,  1, -1,  1,  0,  1,  1, -1, -1, -1,  1, -1, -1,  1,  1,  0,  0,
+        1, -1,  0,  1, -1, -1, -1,  1, -1,  0, -1,  1,  1,  0,  0,  1, -1,
+        0,  1, -1,  1,  0,  1,  0,  1,  0,  0,  0, -1, -1,  0,  0, -1, -1,
+       -1,  0,  0, -1,  1, -1,  1,  1,  0,  1,  1,  0,  0,  1, -1,  0,  0,
+        0,  0,  1, -1,  1, -1, -1,  1,  1,  1,  1,  0, -1,  1, -1,  0,  1,
+        0,  1,  1,  0,  0,  0,  1, -1, -1, -1,  0,  0, -1, -1,  1, -1, -1,
+        0,  0, -1, -1, -1, -1, -1,  1,  1,  1,  1, -1,  0,  1,  1, -1, -1,
+        1, -1, -1,  1, -1, -1,  1,  0, -1,  0, -1,  1, -1, -1, -1, -1, -1,
+        0, -1, -1, -1, -1, -1,  1,  1, -1,  0,  1, -1, -1,  1,  0,  1,  1,
+       -1,  0,  0, -1,  1,  1,  1,  0,  1,  0,  1,  1,  1, -1, -1,  1,  0,
+        1,  1,  1,  0,  1,  0, -1,  1, -1, -1, -1,  1, -1,  1,  1,  0, -1,
+       -1,  1,  1, -1,  1,  0,  0,  1, -1,  0,  0,  0,  1,  1,  1,  1,  0,
+        0,  1,  1,  0, -1,  0, -1,  1,  1,  1,  1, -1, -1,  1,  0,  0,  0,
+       -1]
 T,Vp,X,u = portafolio_sim(precio,sit,Ud)
 #%% 
 plt.figure(figsize=(8,8))
