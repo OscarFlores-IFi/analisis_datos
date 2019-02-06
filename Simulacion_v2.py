@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Tue Feb  5 20:20:46 2019
+
+@author: if715029
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Tue Jan 29 20:16:35 2019
 
 @author: if715029
@@ -23,7 +30,7 @@ def crear_ventanas(data,n_ventana):
     return dat_new
 
 #%%
-ndias = [5,20,125]
+ndias = [5,20,40,125]
 vent = []
 for i in ndias:
     vent.append(crear_ventanas(data['Close'],i))
@@ -77,5 +84,62 @@ for i in range(cont):
 sit = np.zeros(len(clasif_close[0]))
 for i in range(cont):
     sit += clasif_close[i]*4**i
+    
+
+#%% Funcion del modelo del portafolio
+def portafolio(x,u,p,rcom):
+    x_1 = x;
+    vp = x[0]+p*x[1] #Valor presente del portafolios
+    x_1[0] = x[0]-p*u-rcom*p*abs(u) #Dinero disponible
+    x_1[1] = x[1]+u #Acciones disponibles
+    return vp,x_1
 
 
+#%% Función para realizar la simulación del portafolio
+def portafolio_sim(precio,sit,Ud):
+    T = np.arange(len(precio))
+        
+    Vp = np.zeros(T.shape)
+    X  = np.zeros((T.shape[0]+1,2))
+    u = np.zeros(T.shape)
+    X[0][0] = 10000
+    rcom = 0.0025
+    
+    for t in T:
+        
+        u_max = np.floor(X[t][0]/((1+rcom)*precio[t])) # Numero maximo de la operacion
+        u_min  = -X[t][1] # Numero minimo de la operacion
+        
+        #AC (operacion matricial)
+        if Ud[int(sit[t])]>0:
+            u[t] = u_max*Ud[t]
+        else:
+            u[t] = u_min
+        
+        Vp[t],X[t+1]=portafolio(X[t],u[t],precio[t],rcom)
+    
+    return T,Vp,X,u
+
+#%% Ejecucion de la funcion de simulacion
+ndata = len(sit)
+precio = data.Close[-ndata:]
+Ud = np.random.randint(-1,2,ndata)
+T,Vp,X,u = portafolio_sim(precio,sit,Ud)
+#%% 
+plt.figure(figsize=(8,8))
+plt.subplot(3,1,1)
+plt.plot(T,precio)
+plt.ylabel('p(t)')
+plt.grid()
+
+plt.subplot(3,1,2)
+plt.plot( T[ndias[-1]:],Vp[ndias[-1]:])
+plt.ylabel('vp(t)')
+plt.xlabel('time')
+plt.grid()
+
+plt.subplot(3,1,3)
+plt.plot( T[ndias[-1]:],u[ndias[-1]:])
+plt.ylabel('u(t)')
+plt.grid()
+plt.show()
