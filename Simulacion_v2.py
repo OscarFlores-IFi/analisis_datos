@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb  5 20:20:46 2019
-
-@author: if715029
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Tue Jan 29 20:16:35 2019
 
 @author: if715029
@@ -17,9 +10,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from time import time
 
 
-
+t1 = time()
 data = pd.read_csv('Data/AC.csv', index_col='0')
 #%%
 def crear_ventanas(data,n_ventana):
@@ -52,8 +46,8 @@ def grafica_codo_kmeans(data,n_centroides):
     plt.show()
     return n_centroides,inercias
 #%%
-for i in range(cont):
-    grafica_codo_kmeans(vent[i],np.arange(1,16))
+#for i in range(cont):
+#    grafica_codo_kmeans(vent[i],np.arange(1,16))
 #%%
 model_close = []
 for i in range(cont):
@@ -68,8 +62,8 @@ def ver_centroides(centroides):
         plt.ylabel('Grupo %d'%k)
     plt.show()
 #%%
-for i in range(cont):
-    ver_centroides(model_close[i].cluster_centers_)
+#for i in range(cont):
+#    ver_centroides(model_close[i].cluster_centers_)
 
 #%%
 clasif_close = []
@@ -126,38 +120,40 @@ def portafolio_sim(precio,sit,Ud):
 ndata = int(max(sit))+1
 precio = data.Close[-len(sit):]
 #Ud = np.random.randint(-1,2,ndata)
-Ud = [-1, -1,  0, -1, -1,  1, -1,  1,  0,  1,  0,  1, -1,  0,  0, -1,  0,
-        1,  0,  0,  0,  0,  0,  0, -1,  1,  0,  1,  0,  0,  1,  1,  1,  1,
-        1,  0,  0,  0,  1,  0, -1,  1,  0,  0, -1,  0,  1,  1, -1,  1, -1,
-       -1,  0, -1,  1, -1, -1,  1, -1, -1,  1, -1, -1,  1,  0, -1,  0, -1,
-        1, -1,  0,  0,  0, -1,  1,  0,  1, -1, -1,  0,  0,  0, -1, -1,  0,
-        0,  1,  0, -1,  0,  1,  1,  0,  1, -1,  0,  0, -1, -1,  1,  1,  1,
-        0,  1,  1,  0,  1, -1,  1,  0,  0, -1,  1,  1, -1,  0,  0, -1,  0,
-       -1,  0, -1,  0,  1,  1,  0,  1,  0,  1,  1,  0,  0,  0,  0,  1, -1,
-        1, -1,  0,  0,  1, -1,  0, -1, -1,  1,  1,  0,  1,  1,  1,  0, -1,
-        0,  1,  1,  1,  0,  1,  0,  1, -1, -1, -1, -1,  1,  0, -1,  0, -1,
-        1,  0,  0,  1,  0, -1, -1,  1, -1, -1,  1,  0,  1,  1,  1,  0,  1,
-        0, -1, -1,  0,  1,  0,  1,  1,  0,  1, -1,  0, -1, -1, -1,  0, -1,
-       -1,  0, -1, -1, -1, -1,  0,  0, -1, -1,  0,  0,  1, -1, -1,  1, -1,
-       -1, -1,  1,  0,  1,  1,  0, -1,  1,  1,  0,  1,  1,  1,  0, -1,  0,
-        0,  0,  1,  1,  1, -1,  1,  1,  1, -1, -1,  1,  0,  1,  1,  1, -1,
-        0]
+Ud = [-1,  0, -1,  1,  0, -1, -1,  0,  1,  1,  1,  0,  0, -1, -1, -1, -1,
+       -1, -1, -1,  1,  1, -1,  0,  1,  0,  0, -1,  0,  0,  1,  0,  1,  1,
+        1, -1, -1,  0,  1, -1, -1,  1,  0, -1, -1, -1, -1, -1, -1,  0,  1,
+        1, -1,  1,  1,  1,  0,  1,  0,  1,  1,  1,  1,  1, -1,  0,  1,  1,
+       -1,  0,  0,  0,  0,  0, -1, -1,  0, -1, -1,  0, -1,  0,  1, -1, -1,
+        1,  1, -1,  0, -1,  0,  0,  0, -1,  0,  0,  1,  1,  0, -1,  0,  0,
+        1, -1, -1, -1,  1,  0,  1,  1,  1, -1,  1,  0,  1,  1,  1,  0,  1,
+        0,  0,  0, -1, -1, -1, -1,  0,  1,  1,  1, -1,  0,  0, -1,  1, -1,
+        1,  1,  0,  0,  1, -1, -1,  1,  0,  0,  1,  1,  0,  0, -1,  1, -1,
+        1, -1,  0,  1,  1,  0,  1,  1, -1, -1,  0,  1,  1,  0,  0,  1, -1,
+        1,  0, -1,  0,  0,  1,  1, -1,  1, -1, -1, -1, -1,  1,  1,  0,  0,
+        0,  1, -1,  1,  0, -1,  0, -1,  0,  0,  1, -1,  0,  0,  0, -1,  0,
+        0,  0, -1,  0,  0,  0,  1,  1,  0, -1,  0,  1,  0,  1, -1,  1, -1,
+        1, -1,  0,  1, -1,  1,  0,  1, -1,  1, -1, -1,  1, -1, -1,  1,  1,
+       -1,  0,  0,  1, -1,  1, -1, -1, -1, -1,  0,  0,  0, -1,  1,  1,  1,
+       -1]
 T,Vp,X,u = portafolio_sim(precio,sit,Ud)
 #%% 
-plt.figure(figsize=(8,8))
+plt.figure(figsize=(8,6))
 plt.subplot(3,1,1)
 plt.plot(T,precio)
 plt.ylabel('p(t)')
 plt.grid()
 
 plt.subplot(3,1,2)
-plt.plot( T[ndias[-1]:],Vp[ndias[-1]:])
+plt.plot( T,Vp)
 plt.ylabel('vp(t)')
 plt.xlabel('time')
 plt.grid()
 
 plt.subplot(3,1,3)
-plt.plot( T[ndias[-1]:],u[ndias[-1]:])
+plt.plot( T,u)
 plt.ylabel('u(t)')
 plt.grid()
 plt.show()
+
+print(time()-t1)

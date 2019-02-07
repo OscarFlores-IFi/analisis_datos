@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 
 import numpy as np
+from time import time
 
 ###############################################################################
 # Se corre la simulación con vectores de decisiones genéticos
 
 l_vec = 256 #longitud del vector de toma de decisiones
-l_dec = 512 #Cantidad de vectores de toma de decisiones
+l_dec = 128 #Cantidad de vectores de toma de decisiones
 
 ### Se otorgan 3 opciones a la toma de decisiones
-decisiones = [[np.random.randint(0,3)-1 for i in range(l_vec)] for i in range(l_dec)] # Inicial. 
+decisiones = [[np.random.randint(-1,2) for i in range(l_vec)] for i in range(l_dec)] # Inicial. 
 
-for cic in range(100):
+t1 = time()
+for cic in range(50):
     a = []
     m = []
     
@@ -22,7 +24,7 @@ for cic in range(100):
         a.append(Vp[-1]) ############################
         #######################################################################
     
-    for i in range(5): ## se escojen los mejores resultados
+    for i in range(l_dec//4): ## se escojen los mejores resultados
         m.append(decisiones[a.index(max(a))])
         a.pop(a.index(max(a)))
     
@@ -33,5 +35,5 @@ for cic in range(100):
             decisiones[i][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
     [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
 
-print(decisiones[-5:])
+print(decisiones[-5:], time()-t1)
 
