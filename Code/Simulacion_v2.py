@@ -11,10 +11,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from time import time
-
+import pickle 
 
 t1 = time()
-data = pd.read_csv('Data/AC.csv', index_col='0')
+data = pd.read_csv('../Data/WALMEX.csv', index_col='0')
 #%%
 def crear_ventanas(data,n_ventana):
     n_data = len(data)
@@ -34,38 +34,41 @@ cont = len(ndias)
 for i in range(cont):
     vent[i] = np.transpose((vent[i].transpose()-vent[i].mean(axis=1))/vent[i].std(axis=1))
 #%% Función para la gráfica de codo
-def grafica_codo_kmeans(data,n_centroides):
-    inercias = np.zeros(n_centroides.shape)
-    for k in n_centroides:
-        model = KMeans(n_clusters=k,init='k-means++').fit(data)
-        inercias[k-1] = model.inertia_
-    # Grafica de codo
-    plt.plot(n_centroides,inercias)
-    plt.xlabel('Num grupos')
-    plt.ylabel('Inercia')
-    plt.show()
-    return n_centroides,inercias
+#def grafica_codo_kmeans(data,n_centroides):
+#    inercias = np.zeros(n_centroides.shape)
+#    for k in n_centroides:
+#        model = KMeans(n_clusters=k,init='k-means++').fit(data)
+#        inercias[k-1] = model.inertia_
+#    # Grafica de codo
+#    plt.plot(n_centroides,inercias)
+#    plt.xlabel('Num grupos')
+#    plt.ylabel('Inercia')
+#    plt.show()
+#    return n_centroides,inercias
 #%%
 #for i in range(cont):
 #    grafica_codo_kmeans(vent[i],np.arange(1,16))
 #%%
-model_close = []
-for i in range(cont):
-    model_close.append(KMeans(n_clusters=4,init='k-means++').fit(vent[i]))
+#model_close = []
+#for i in range(cont):
+#    model_close.append(KMeans(n_clusters=4,init='k-means++').fit(vent[i]))
 
 #%% Función para dibujar los centroides del modelo
-def ver_centroides(centroides):
-    n_subfig = np.ceil(np.sqrt(centroides.shape[0]))
-    for k in np.arange(centroides.shape[0]):
-        plt.subplot(n_subfig,n_subfig,k+1)
-        plt.plot(centroides[k,:])
-        plt.ylabel('Grupo %d'%k)
-    plt.show()
+#def ver_centroides(centroides):
+#    n_subfig = np.ceil(np.sqrt(centroides.shape[0]))
+#    for k in np.arange(centroides.shape[0]):
+#        plt.subplot(n_subfig,n_subfig,k+1)
+#        plt.plot(centroides[k,:])
+#        plt.ylabel('Grupo %d'%k)
+#    plt.show()
 #%%
 #for i in range(cont):
 #    ver_centroides(model_close[i].cluster_centers_)
 
 #%%
+model_close = pickle.load(open('model_close.sav','rb'))
+
+#%%    
 clasif_close = []
 for i in range(cont):
     clasif_close.append(model_close[i].predict(vent[i]))
@@ -102,15 +105,13 @@ def portafolio_sim(precio,sit,Ud):
     for t in T:
         
         u_max = np.floor(X[t][0]/((1+rcom)*precio[t])) # Numero maximo de la operacion
-        u_min  = -X[t][1] # Numero minimo de la operacion
+        u_min  = X[t][1] # Numero minimo de la operacion
         
         #AC (operacion matricial)
         if Ud[int(sit[t])]>0:
-            u[t] = u_max
-        elif Ud[int(sit[t])]<0:
-            u[t] = u_min
-        else: 
-            u[t] = 0
+            u[t] = u_max*Ud[int(sit[t])]
+        else:
+            u[t] = u_min*Ud[int(sit[t])]
         
         Vp[t],X[t+1]=portafolio(X[t],u[t],precio[t],rcom)
     
@@ -120,22 +121,22 @@ def portafolio_sim(precio,sit,Ud):
 ndata = int(max(sit))+1
 precio = data.Close[-len(sit):]
 #Ud = np.random.randint(-1,2,ndata)
-Ud = [-1,  0, -1,  1,  0, -1, -1,  0,  1,  1,  1,  0,  0, -1, -1, -1, -1,
-       -1, -1, -1,  1,  1, -1,  0,  1,  0,  0, -1,  0,  0,  1,  0,  1,  1,
-        1, -1, -1,  0,  1, -1, -1,  1,  0, -1, -1, -1, -1, -1, -1,  0,  1,
-        1, -1,  1,  1,  1,  0,  1,  0,  1,  1,  1,  1,  1, -1,  0,  1,  1,
-       -1,  0,  0,  0,  0,  0, -1, -1,  0, -1, -1,  0, -1,  0,  1, -1, -1,
-        1,  1, -1,  0, -1,  0,  0,  0, -1,  0,  0,  1,  1,  0, -1,  0,  0,
-        1, -1, -1, -1,  1,  0,  1,  1,  1, -1,  1,  0,  1,  1,  1,  0,  1,
-        0,  0,  0, -1, -1, -1, -1,  0,  1,  1,  1, -1,  0,  0, -1,  1, -1,
-        1,  1,  0,  0,  1, -1, -1,  1,  0,  0,  1,  1,  0,  0, -1,  1, -1,
-        1, -1,  0,  1,  1,  0,  1,  1, -1, -1,  0,  1,  1,  0,  0,  1, -1,
-        1,  0, -1,  0,  0,  1,  1, -1,  1, -1, -1, -1, -1,  1,  1,  0,  0,
-        0,  1, -1,  1,  0, -1,  0, -1,  0,  0,  1, -1,  0,  0,  0, -1,  0,
-        0,  0, -1,  0,  0,  0,  1,  1,  0, -1,  0,  1,  0,  1, -1,  1, -1,
-        1, -1,  0,  1, -1,  1,  0,  1, -1,  1, -1, -1,  1, -1, -1,  1,  1,
-       -1,  0,  0,  1, -1,  1, -1, -1, -1, -1,  0,  0,  0, -1,  1,  1,  1,
-       -1]
+Ud = [ 1,  0,  0, -1, -1,  1,  1,  0,  1,  1,  1, -1, -1,  0, -1,  1, -1,
+        0, -1,  1,  1,  1,  0,  1, -1,  1,  1,  1,  0,  1,  1, -1, -1,  0,
+       -1, -1,  0,  1, -1,  0,  0, -1, -1,  0, -1,  1,  1,  0,  0,  0,  1,
+        0,  1,  0,  0,  0, -1,  1,  0, -1,  0, -1, -1, -1, -1, -1,  1, -1,
+        0,  0,  0, -1, -1,  1,  0,  1, -1,  1,  1, -1,  1,  0,  0,  0,  1,
+        1, -1,  1,  0,  1,  1,  0, -1,  0,  0, -1,  0,  1,  0,  1,  0,  1,
+        0, -1,  0,  1,  1,  0, -1,  1,  1, -1,  0, -1,  0,  0, -1,  1,  1,
+        1,  1,  0, -1,  0,  0, -1, -1, -1,  1,  0, -1,  1, -1,  0,  1,  0,
+        1,  0,  0,  1, -1,  0, -1,  1,  0,  0, -1,  0,  0,  0, -1, -1,  1,
+        0, -1,  1, -1,  0,  1, -1,  1,  1,  1,  1,  0, -1, -1,  1, -1,  0,
+       -1,  1,  1,  1,  0,  0,  0,  1, -1,  1, -1, -1,  1,  0,  1, -1, -1,
+       -1, -1, -1, -1,  0,  1, -1, -1, -1, -1, -1, -1,  1,  0, -1,  1,  0,
+       -1, -1, -1, -1,  1,  1,  0,  1, -1, -1,  1,  0,  1,  0, -1, -1,  0,
+        1,  1,  1,  1,  0,  0, -1,  1,  1,  0, -1,  1, -1, -1,  1,  0,  1,
+       -1, -1,  1, -1,  1,  1,  0,  0, -1, -1, -1, -1,  0, -1,  0, -1,  0,
+        1]
 T,Vp,X,u = portafolio_sim(precio,sit,Ud)
 #%% 
 plt.figure(figsize=(8,6))
