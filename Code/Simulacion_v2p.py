@@ -32,52 +32,29 @@ def crear_ventanas(data,n_ventana):
 #%%
 ndias = [5,20,40,125]
 vent = []
-for i in ndias:
-    vent.append(crear_ventanas(data['Close'],i))
+for j in data: 
+    ven = []
+    for i in ndias:
+        ven.append(crear_ventanas(j['Close'],i))
+    vent.append(ven)
+    
 #%%
 cont = len(ndias)    
-    
-for i in range(cont):
-    vent[i] = np.transpose((vent[i].transpose()-vent[i].mean(axis=1))/vent[i].std(axis=1))
-#%% Función para la gráfica de codo
-#def grafica_codo_kmeans(data,n_centroides):
-#    inercias = np.zeros(n_centroides.shape)
-#    for k in n_centroides:
-#        model = KMeans(n_clusters=k,init='k-means++').fit(data)
-#        inercias[k-1] = model.inertia_
-#    # Grafica de codo
-#    plt.plot(n_centroides,inercias)
-#    plt.xlabel('Num grupos')
-#    plt.ylabel('Inercia')
-#    plt.show()
-#    return n_centroides,inercias
-#%%
-#for i in range(cont):
-#    grafica_codo_kmeans(vent[i],np.arange(1,16))
-#%%
-#model_close = []
-#for i in range(cont):
-#    model_close.append(KMeans(n_clusters=4,init='k-means++').fit(vent[i]))
 
-#%% Función para dibujar los centroides del modelo
-#def ver_centroides(centroides):
-#    n_subfig = np.ceil(np.sqrt(centroides.shape[0]))
-#    for k in np.arange(centroides.shape[0]):
-#        plt.subplot(n_subfig,n_subfig,k+1)
-#        plt.plot(centroides[k,:])
-#        plt.ylabel('Grupo %d'%k)
-#    plt.show()
-#%%
-#for i in range(cont):
-#    ver_centroides(model_close[i].cluster_centers_)
-
+norm = []
+for j in vent:
+    for i in range(cont):
+        j[i] = np.transpose((j[i].transpose()-j[i].mean(axis=1))/j[i].std(axis=1))
+    norm.append(j)
+        
 #%%
 model_close = pickle.load(open('model_close.sav','rb'))
 
 #%%    
 clasif_close = []
+
 for i in range(cont):
-    clasif_close.append(model_close[i].predict(vent[i]))
+    clasif_close.append(model_close[i].predict(norm[i]))
     
 #%%  
 for i in range(cont):
