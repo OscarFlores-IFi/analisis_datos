@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan 29 20:16:35 2019
+Created on Tue Feb 12 20:21:31 2019
 
 @author: if715029
 """
-
 
 import pandas as pd
 import numpy as np
@@ -13,11 +12,15 @@ from sklearn.cluster import KMeans
 from time import time
 import pickle 
 
-
 #%%
 
+csv = ['AC','ALFAA','ALPEKA','ALSEA','ELEKTRA','IENOVA','MEXCHEM','PE&OLES','PINFRA','WALMEX']
+data = []
 t1 = time()
-data = pd.read_csv('../Data/WALMEX.csv', index_col=0)
+
+for i in csv: 
+#    data.append(pd.read_csv('../Data/%s.csv'%i, index_col='0'))
+    data.append(pd.read_csv('Data/%s.csv'%i, index_col=0))
 #%%
 def crear_ventanas(data,n_ventana):
     n_data = len(data)
