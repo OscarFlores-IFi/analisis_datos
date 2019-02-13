@@ -121,7 +121,7 @@ def portafolio_sim(precio,sit,Ud):
     return T,Vp,X,u
 
 #%% Ejecucion de la funcion de simulacion
-ndata = int(max(sit))+1
+ndata = 4**cont
 precio = data.Close[-len(sit):]
 #Ud = np.random.randint(-1,2,ndata)
 Ud = [ 1,  0,  0, -1, -1,  1,  1,  0,  1,  1,  1, -1, -1,  0, -1,  1, -1,

@@ -8,7 +8,7 @@ Created on Tue Feb 12 20:21:31 2019
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
+#from sklearn.cluster import KMeans
 from time import time
 import pickle 
 
@@ -19,8 +19,9 @@ data = []
 t1 = time()
 
 for i in csv: 
-#    data.append(pd.read_csv('../Data/%s.csv'%i, index_col='0'))
-    data.append(pd.read_csv('Data/%s.csv'%i, index_col=0))
+    data.append(pd.read_csv('../Data/%s.csv'%i, index_col='0'))
+#    data.append(pd.read_csv('Data/%s.csv'%i, index_col=0))
+    
 #%%
 def crear_ventanas(data,n_ventana):
     n_data = len(data)
@@ -51,20 +52,30 @@ for j in vent:
 model_close = pickle.load(open('model_close.sav','rb'))
 
 #%%    
+
 clasif_close = []
 
-for i in range(cont):
-    clasif_close.append(model_close[i].predict(norm[i]))
+for norm in norm:
+    tmp = []
+    for i in range(cont):
+        tmp.append(model_close[i].predict(norm[i]))
+    clasif_close.append(tmp)   
     
 #%%  
-for i in range(cont):
-    clasif_close[i]=clasif_close[i][:-len(clasif_close[-1])-1:-1]
+clasif = []
+
+for j in clasif_close:
+    for i in range(cont):
+        j[i]=j[i][:-len(j[-1])-1:-1]
+    clasif.append(j)
     
 #%%    
-sit = np.zeros(len(clasif_close[0]))
-for i in range(cont):
-    sit += clasif_close[i]*4**i
-    
+sit = []
+for j in clasif:
+    s1 = np.zeros(len(j[0]))
+    for i in range(cont):
+        s1 += j[i]*4**i
+    sit.append(s1)
 
 #%% Funcion del modelo del portafolio
 def portafolio(x,u,p,rcom):
@@ -73,7 +84,6 @@ def portafolio(x,u,p,rcom):
     x_1[0] = x[0]-p*u-rcom*p*abs(u) #Dinero disponible
     x_1[1] = x[1]+u #Acciones disponibles
     return vp,x_1
-
 
 #%% Función para realizar la simulación del portafolio
 def portafolio_sim(precio,sit,Ud):
@@ -100,44 +110,54 @@ def portafolio_sim(precio,sit,Ud):
     
     return T,Vp,X,u
 
+#%%
+def portafolios_sim(data,sit,Ud):
+    Sim = []
+    for i in range(len(data)):
+        Sim.append(portafolio_sim(data[i].Close[-len(sit[0]):],sit[i],Ud))
+        
+    return(Sim)
+    
 #%% Ejecucion de la funcion de simulacion
-ndata = int(max(sit))+1
-precio = data.Close[-len(sit):]
-#Ud = np.random.randint(-1,2,ndata)
-Ud = [ 1,  0,  0, -1, -1,  1,  1,  0,  1,  1,  1, -1, -1,  0, -1,  1, -1,
-        0, -1,  1,  1,  1,  0,  1, -1,  1,  1,  1,  0,  1,  1, -1, -1,  0,
-       -1, -1,  0,  1, -1,  0,  0, -1, -1,  0, -1,  1,  1,  0,  0,  0,  1,
-        0,  1,  0,  0,  0, -1,  1,  0, -1,  0, -1, -1, -1, -1, -1,  1, -1,
-        0,  0,  0, -1, -1,  1,  0,  1, -1,  1,  1, -1,  1,  0,  0,  0,  1,
-        1, -1,  1,  0,  1,  1,  0, -1,  0,  0, -1,  0,  1,  0,  1,  0,  1,
-        0, -1,  0,  1,  1,  0, -1,  1,  1, -1,  0, -1,  0,  0, -1,  1,  1,
-        1,  1,  0, -1,  0,  0, -1, -1, -1,  1,  0, -1,  1, -1,  0,  1,  0,
-        1,  0,  0,  1, -1,  0, -1,  1,  0,  0, -1,  0,  0,  0, -1, -1,  1,
-        0, -1,  1, -1,  0,  1, -1,  1,  1,  1,  1,  0, -1, -1,  1, -1,  0,
-       -1,  1,  1,  1,  0,  0,  0,  1, -1,  1, -1, -1,  1,  0,  1, -1, -1,
-       -1, -1, -1, -1,  0,  1, -1, -1, -1, -1, -1, -1,  1,  0, -1,  1,  0,
-       -1, -1, -1, -1,  1,  1,  0,  1, -1, -1,  1,  0,  1,  0, -1, -1,  0,
-        1,  1,  1,  1,  0,  0, -1,  1,  1,  0, -1,  1, -1, -1,  1,  0,  1,
-       -1, -1,  1, -1,  1,  1,  0,  0, -1, -1, -1, -1,  0, -1,  0, -1,  0,
-        1]
-T,Vp,X,u = portafolio_sim(precio,sit,Ud)
-#%% 
-plt.figure(figsize=(8,6))
-plt.subplot(3,1,1)
-plt.plot(T,precio)
-plt.ylabel('p(t)')
-plt.grid()
+ndata = 4**cont
+Ud = np.random.randint(-1,2,ndata)
+#Ud = [ 1,  0,  0, -1, -1,  1,  1,  0,  1,  1,  1, -1, -1,  0, -1,  1, -1,
+#        0, -1,  1,  1,  1,  0,  1, -1,  1,  1,  1,  0,  1,  1, -1, -1,  0,
+#       -1, -1,  0,  1, -1,  0,  0, -1, -1,  0, -1,  1,  1,  0,  0,  0,  1,
+#        0,  1,  0,  0,  0, -1,  1,  0, -1,  0, -1, -1, -1, -1, -1,  1, -1,
+#        0,  0,  0, -1, -1,  1,  0,  1, -1,  1,  1, -1,  1,  0,  0,  0,  1,
+#        1, -1,  1,  0,  1,  1,  0, -1,  0,  0, -1,  0,  1,  0,  1,  0,  1,
+#        0, -1,  0,  1,  1,  0, -1,  1,  1, -1,  0, -1,  0,  0, -1,  1,  1,
+#        1,  1,  0, -1,  0,  0, -1, -1, -1,  1,  0, -1,  1, -1,  0,  1,  0,
+#        1,  0,  0,  1, -1,  0, -1,  1,  0,  0, -1,  0,  0,  0, -1, -1,  1,
+#        0, -1,  1, -1,  0,  1, -1,  1,  1,  1,  1,  0, -1, -1,  1, -1,  0,
+#       -1,  1,  1,  1,  0,  0,  0,  1, -1,  1, -1, -1,  1,  0,  1, -1, -1,
+#       -1, -1, -1, -1,  0,  1, -1, -1, -1, -1, -1, -1,  1,  0, -1,  1,  0,
+#       -1, -1, -1, -1,  1,  1,  0,  1, -1, -1,  1,  0,  1,  0, -1, -1,  0,
+#        1,  1,  1,  1,  0,  0, -1,  1,  1,  0, -1,  1, -1, -1,  1,  0,  1,
+#       -1, -1,  1, -1,  1,  1,  0,  0, -1, -1, -1, -1,  0, -1,  0, -1,  0,
+#        1]
 
-plt.subplot(3,1,2)
-plt.plot( T,Vp)
-plt.ylabel('vp(t)')
-plt.xlabel('time')
-plt.grid()
+Sim = portafolios_sim(data,sit,Ud)
 
-plt.subplot(3,1,3)
-plt.plot( T,u)
-plt.ylabel('u(t)')
-plt.grid()
-plt.show()
+#%% Grafica los resultados
+for i in range(len(Sim)): 
+    plt.figure(figsize=(8,6))
+    plt.subplot(3,1,1)
+    plt.plot(Sim[i][0],data[i].Close[-len(sit[0]):])
+    plt.ylabel('p(t)')
+    plt.grid()
+    
+    plt.subplot(3,1,2)
+    plt.plot(Sim[i][0],Sim[i][1])
+    plt.ylabel('vp(t)')
+    plt.xlabel('time')
+    plt.grid()
+    
+    plt.subplot(3,1,3)
+    plt.plot(Sim[i][0],Sim[i][3])
+    plt.ylabel('u(t)')
+    plt.grid()
+    plt.show()
 
 print(time()-t1)
