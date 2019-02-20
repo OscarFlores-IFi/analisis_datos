@@ -108,7 +108,8 @@ def portafolio_sim(precio,sit,Ud):
         
         Vp[t],X[t+1]=portafolio(X[t],u[t],precio[t],rcom)
     
-    return T,Vp,X,u
+#    return T,Vp,X,u
+    return Vp
 
 #%%
 def portafolios_sim(data,sit,Ud):
@@ -116,48 +117,48 @@ def portafolios_sim(data,sit,Ud):
     for i in range(len(data)):
         Sim.append(portafolio_sim(data[i].Close[-len(sit[0]):],sit[i],Ud))
         
-    return(Sim)
+    return(np.array(Sim))
     
 #%% Ejecucion de la funcion de simulacion
 ndata = 4**cont
 Ud = np.random.randint(-1,2,ndata)
-#Ud = [ 1,  0,  0, -1, -1,  1,  1,  0,  1,  1,  1, -1, -1,  0, -1,  1, -1,
-#        0, -1,  1,  1,  1,  0,  1, -1,  1,  1,  1,  0,  1,  1, -1, -1,  0,
-#       -1, -1,  0,  1, -1,  0,  0, -1, -1,  0, -1,  1,  1,  0,  0,  0,  1,
-#        0,  1,  0,  0,  0, -1,  1,  0, -1,  0, -1, -1, -1, -1, -1,  1, -1,
-#        0,  0,  0, -1, -1,  1,  0,  1, -1,  1,  1, -1,  1,  0,  0,  0,  1,
-#        1, -1,  1,  0,  1,  1,  0, -1,  0,  0, -1,  0,  1,  0,  1,  0,  1,
-#        0, -1,  0,  1,  1,  0, -1,  1,  1, -1,  0, -1,  0,  0, -1,  1,  1,
-#        1,  1,  0, -1,  0,  0, -1, -1, -1,  1,  0, -1,  1, -1,  0,  1,  0,
-#        1,  0,  0,  1, -1,  0, -1,  1,  0,  0, -1,  0,  0,  0, -1, -1,  1,
-#        0, -1,  1, -1,  0,  1, -1,  1,  1,  1,  1,  0, -1, -1,  1, -1,  0,
-#       -1,  1,  1,  1,  0,  0,  0,  1, -1,  1, -1, -1,  1,  0,  1, -1, -1,
-#       -1, -1, -1, -1,  0,  1, -1, -1, -1, -1, -1, -1,  1,  0, -1,  1,  0,
-#       -1, -1, -1, -1,  1,  1,  0,  1, -1, -1,  1,  0,  1,  0, -1, -1,  0,
-#        1,  1,  1,  1,  0,  0, -1,  1,  1,  0, -1,  1, -1, -1,  1,  0,  1,
-#       -1, -1,  1, -1,  1,  1,  0,  0, -1, -1, -1, -1,  0, -1,  0, -1,  0,
-#        1]
+#Ud = [ 1,  0,  1,  1,  1, -1,  1,  0, -1, -1,  1, -1,  0, -1,  0,  0,  0,
+#        0, -1,  0,  0, -1,  1,  1, -1,  0,  1,  1,  1, -1, -1, -1,  0,  1,
+#        1,  1,  0,  1,  1, -1, -1,  1,  1,  0, -1,  0,  1,  0,  0,  1,  0,
+#       -1,  0,  1,  0,  0,  0, -1, -1,  1,  0,  0, -1,  0, -1,  0, -1,  0,
+#       -1,  1,  1, -1,  0, -1,  0,  1,  0, -1, -1, -1,  0,  1, -1,  1,  0,
+#       -1, -1, -1,  1,  1,  1, -1, -1,  1,  1, -1,  1,  0, -1,  0,  1,  1,
+#        0,  1,  0,  1,  0, -1,  1, -1, -1, -1, -1,  1, -1, -1,  1,  1,  1,
+#        1, -1, -1,  0,  0,  1,  1, -1,  1, -1, -1,  1,  0,  1,  1, -1, -1,
+#       -1,  0,  0, -1, -1,  1, -1, -1,  1, -1,  0,  0,  0,  1,  1, -1,  1,
+#        1, -1,  0, -1, -1,  0,  1, -1,  0, -1,  0,  0,  1, -1, -1,  1, -1,
+#        0,  1,  1,  1, -1,  1,  0,  1,  0,  1,  0,  1,  1, -1,  0,  1,  0,
+#        0,  0, -1,  0,  0,  0,  0,  1, -1, -1,  1,  1, -1, -1, -1, -1,  0,
+#        0,  1,  0, -1,  0,  0,  1, -1,  1, -1,  1,  1,  0,  1,  1, -1,  0,
+#        1, -1,  1, -1,  0,  0, -1,  0, -1,  1,  0,  1, -1, -1,  1,  0,  0,
+#       -1,  0, -1, -1, -1, -1,  0,  0, -1,  1,  1,  0,  1, -1, -1,  0, -1,
+#       -1]
 
 Sim = portafolios_sim(data,sit,Ud)
 
 #%% Grafica los resultados
-for i in range(len(Sim)): 
-    plt.figure(figsize=(8,6))
-    plt.subplot(3,1,1)
-    plt.plot(Sim[i][0],data[i].Close[-len(sit[0]):])
-    plt.ylabel('p(t)')
-    plt.grid()
-    
-    plt.subplot(3,1,2)
-    plt.plot(Sim[i][0],Sim[i][1])
-    plt.ylabel('vp(t)')
-    plt.xlabel('time')
-    plt.grid()
-    
-    plt.subplot(3,1,3)
-    plt.plot(Sim[i][0],Sim[i][3])
-    plt.ylabel('u(t)')
-    plt.grid()
-    plt.show()
-
-print(time()-t1)
+#for i in range(len(Sim)): 
+#    plt.figure(figsize=(8,6))
+#    plt.subplot(3,1,1)
+#    plt.plot(Sim[i][0],data[i].Close[-len(sit[0]):])
+#    plt.ylabel('p(t)')
+#    plt.grid()
+#    
+#    plt.subplot(3,1,2)
+#    plt.plot(Sim[i][0],Sim[i][1])
+#    plt.ylabel('vp(t)')
+#    plt.xlabel('time')
+#    plt.grid()
+#    
+#    plt.subplot(3,1,3)
+#    plt.plot(Sim[i][0],Sim[i][3])
+#    plt.ylabel('u(t)')
+#    plt.grid()
+#    plt.show()
+#
+#print(time()-t1)
