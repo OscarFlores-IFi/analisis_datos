@@ -5,47 +5,68 @@ from time import time
 
 ###############################################################################
 # Se corre la simulación con vectores de decisiones genéticos
-
-l_vec = 256 #longitud del vector de toma de decisiones
-l_dec = 128 #Cantidad de vectores de toma de decisiones
-
-### Se otorgan 3 opciones a la toma de decisiones
-decisiones = [[np.random.randint(-1,2) for i in range(l_vec)] for i in range(l_dec)] # Inicial. 
-
 t1 = time()
 
-iteraciones = 300
+
+l_vec = 256 #longitud del vector de toma de decisiones
+l_dec = 64 #Cantidad de vectores de toma de decisiones     *** en potencias de 2 (2**n) ***
+
+### Se otorgan 3 opciones a la toma de decisiones
+decisiones = np.random.randint(-1,2,(l_dec,l_vec)) # Inicial. 
+
+iteraciones = 50
 hist = np.zeros(iteraciones)
+
+
+p = np.zeros(l_dec//4) # calificaciones padres
+a = np.zeros(l_dec//4*5) # puntuaciones de hijos
+m = np.zeros((l_dec//4,l_vec)) # padres
+
 for cic in range(iteraciones):
-    a = []
-    m = []
     
-    
-    for i in decisiones: ## se suman todos vectores de decisión para escoger el que de la suma mayor
+    for i in np.arange(l_dec): ## se simulan todos vectores de decisión para escoger el que de la suma mayor
         
 #        #######################################################################
-#        T,Vp,X,u = portafolio_sim(precio,sit,i) ###############################
-#        a.append(Vp[-1]) ######################################################
+#        T,Vp,X,u = portafolio_sim(precio,sit,decisiones[i]) ###################
+#        pct = Vp[1:]/Vp[:-1]-1 ################################################
+#        a[i] = (pct) ########################################################## 1 empresa
 #        #######################################################################
         
         
         #######################################################################
-        Sim = portafolios_sim(data,sit,i) #####################################
-        a.append(Sim[:,-1].sum()) #############################################
+        Sim = portafolios_sim(data,sit,decisiones[i]) #########################
+        pct = Sim[:,1:]/Sim[:,:-1]-1 ##########################################
+        a[i] = pct.mean() ##################################################### todas las empresas
         #######################################################################
         
-    hist[cic] = max(a)
-    for i in range(l_dec//4): ## se escojen los mejores resultados
-        m.append(decisiones[a.index(max(a))])
-        a.pop(a.index(max(a)))
+        
+    decisiones = np.concatenate((decisiones,m)) # agregamos los 'padres' de las nuevas generaciones a la lista. 
+    a[-int(l_dec//4):] = p # se juntan las puntuaciones de los hijos con la de los padres
+    m = decisiones[np.argsort(a)[-int(l_dec//4):]] # se escojen los padres
+    p = np.sort(a)[-int(l_dec//4):] # se guardan las calificaciones de los nuevos padres  
     
-    m = np.array(m) ## hacemos l_vec nuevos vectores derivados únicamente de los 25% mejores anteriores.
-    decisiones = [[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(l_dec)]
-    for k in range(l_dec): ## mutamos un tercio de los dígitos de los l_vec vectores que tenemos. 
-        for i in range(int(l_dec//2)):
-            decisiones[i][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
-    [decisiones.append(i) for i in m] ## agregamos los 'padres' de las nuevas generaciones a la lista. 
+    hist[cic] = p.mean() #se almacena el promedio de los padres para observar avance generacional
+    
+    decisiones = np.array([[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(l_dec)])
+    for k in range(l_dec): ## mutamos la cuarta parte de los dígitos de los l_dec vectores que tenemos. 
+        for i in range(int(l_vec//4)):
+            decisiones[k][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
+        
+    if np.round(cic%(iteraciones/20))==0:
+        print(np.ceil((1+cic)/iteraciones*100))
+print(m, time()-t1)
 
 
-print(decisiones[-5:], time()-t1)
+
+
+
+
+
+
+
+
+
+
+
+
 
