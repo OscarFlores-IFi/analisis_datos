@@ -2,6 +2,7 @@
 
 import numpy as np
 from time import time
+import pickle
 
 ###############################################################################
 # Se corre la simulación con vectores de decisiones genéticos
@@ -11,16 +12,17 @@ t1 = time()
 l_vec = 256 #longitud del vector de toma de decisiones
 l_dec = 64 #Cantidad de vectores de toma de decisiones     *** en potencias de 2 (2**n) ***
 
-### Se otorgan 3 opciones a la toma de decisiones
+#### Se otorgan 3 opciones a la toma de decisiones
+
 decisiones = np.random.randint(-1,2,(l_dec,l_vec)) # Inicial. 
 
-iteraciones = 50
-hist = np.zeros(iteraciones)
+iteraciones = 500
+hist = np.zeros((iteraciones,l_dec//4)) # no se sobre-escribe
 
 
-p = np.zeros(l_dec//4) # calificaciones padres
-a = np.zeros(l_dec//4*5) # puntuaciones de hijos
-m = np.zeros((l_dec//4,l_vec)) # padres
+p = np.zeros(l_dec//4) # calificaciones padres, se sobre-escribe en cada ciclo
+a = np.zeros(l_dec//4*5) # puntuaciones de hijos, se sobre-escribe en cada ciclo
+m = np.zeros((l_dec//4,l_vec)) # padres, se sobre-escribe en cada ciclo
 
 for cic in range(iteraciones):
     
@@ -45,15 +47,18 @@ for cic in range(iteraciones):
     m = decisiones[np.argsort(a)[-int(l_dec//4):]] # se escojen los padres
     p = np.sort(a)[-int(l_dec//4):] # se guardan las calificaciones de los nuevos padres  
     
-    hist[cic] = p.mean() #se almacena el promedio de los padres para observar avance generacional
+    hist[cic,:] = p #se almacena el promedio de los padres para observar avance generacional
     
     decisiones = np.array([[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(l_dec)])
     for k in range(l_dec): ## mutamos la cuarta parte de los dígitos de los l_dec vectores que tenemos. 
         for i in range(int(l_vec//4)):
             decisiones[k][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
         
-    if np.round(cic%(iteraciones/20))==0:
-        print(np.ceil((1+cic)/iteraciones*100))
+    print(np.ceil((1+cic)/iteraciones*1000)/10)
+
+pickle.dump(m,open('m.sav','wb'))
+pickle.dump(hist,open('hist.sav','wb'))
+
 print(m, time()-t1)
 
 
