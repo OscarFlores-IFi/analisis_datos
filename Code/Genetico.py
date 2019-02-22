@@ -16,7 +16,7 @@ l_dec = 64 #Cantidad de vectores de toma de decisiones     *** en potencias de 2
 
 decisiones = np.random.randint(-1,2,(l_dec,l_vec)) # Inicial. 
 
-iteraciones = 500
+iteraciones = 550
 hist = np.zeros((iteraciones,l_dec//4)) # no se sobre-escribe
 
 
@@ -56,8 +56,7 @@ for cic in range(iteraciones):
         
     print(np.ceil((1+cic)/iteraciones*1000)/10)
 
-pickle.dump(m,open('m.sav','wb'))
-pickle.dump(hist,open('hist.sav','wb'))
+    pickle.dump([cic,hist,m],open('genetico.sav','wb'))
 
 print(m, time()-t1)
 
