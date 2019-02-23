@@ -56,10 +56,11 @@ for cic in range(iteraciones):
         
     print(np.ceil((1+cic)/iteraciones*1000)/10)
 
-    pickle.dump([cic,hist,m],open('genetico.sav','wb'))
+    pickle.dump(m,hist,open('tmp.sav','wb'))
 
 print(m, time()-t1)
 
+pickle.dump([p,a,m,hist],open('genetico.sav','wb')) # guarda las variables más importantes al finalizar. 
 
 #%% para abrir el .sav
 #pickle.load(open('genetico.sav','rb'))
