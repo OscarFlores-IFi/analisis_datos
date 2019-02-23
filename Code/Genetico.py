@@ -61,7 +61,8 @@ for cic in range(iteraciones):
 print(m, time()-t1)
 
 
-
+#%% para abrir el .sav
+#pickle.load(open('genetico.sav','rb'))
 
 
 
