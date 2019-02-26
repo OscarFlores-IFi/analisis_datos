@@ -4,6 +4,7 @@ import numpy as np
 from time import time
 import pickle
 
+#%%
 ###############################################################################
 # Se corre la simulación con vectores de decisiones genéticos
 t1 = time()
@@ -63,16 +64,17 @@ print(m, time()-t1)
 pickle.dump([p,a,m,hist],open('genetico.sav','wb')) # guarda las variables más importantes al finalizar. 
 
 #%% para abrir el .sav
-#pickle.load(open('genetico.sav','rb'))
+[p,a,m,hist] = pickle.load(open('genetico.sav','rb'))
 
+#%% generar un vector de toma de decisiones representativo. 
 
+m0 = m.mean(axis=0) 
+#%% rango : [ -1 , -.35 , .35 , 1 ]
+lim = .35
 
-
-
-
-
-
-
+m0[np.abs(m0)<=lim] = 0
+m0[m0< -lim] = -1
+m0[m0>lim] = 1
 
 
 
