@@ -17,7 +17,7 @@ import pickle
 #%%
 
 t1 = time()
-data = pd.read_csv('../Data/AMZN.csv', index_col=0)
+data = pd.read_csv('../Data/AMX.csv', index_col=0)
 #%%
 def crear_ventanas(data,n_ventana):
     n_data = len(data)

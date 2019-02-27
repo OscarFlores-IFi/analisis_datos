@@ -37,10 +37,10 @@ def yahooKeyStats(stock,start,end):
     
 #%%
     
-stock = ['AC','ALFAA','ALPEKA','ALSEA','ELEKTRA','IENOVA','MEXCHEM','OHLMEX','PE&OLES','PINFRA','WALMEX']
+stock = ['AC','ALFAA','ALPEKA','ALSEA','ELEKTRA','IENOVA','MEXCHEM','PE&OLES','PINFRA','WALMEX']
 
 today = datetime.date.today()
-days =datetime.timedelta(days=1825) #Buscamos 1 año de historia
+days =datetime.timedelta(days=1900) #Buscamos 1 año de historia
 
 timestamp=today-days #Solo es para observar que la fecha sea correcta
 start = int(_time.mktime(today.timetuple())) #fecha inicial
