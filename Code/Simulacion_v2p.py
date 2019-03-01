@@ -62,16 +62,13 @@ for norm in norm:
     clasif_close.append(tmp)   
     
 #%%  
-clasif = []
-
 for j in clasif_close:
     for i in range(cont):
-        j[i]=j[i][:-len(j[-1])-1:-1]
-    clasif.append(j)
+        j[i]=j[i][len(norm[0][i])-len(vent[0][-1]):]
     
 #%%    
 sit = []
-for j in clasif:
+for j in clasif_close:
     s1 = np.zeros(len(j[0]))
     for i in range(cont):
         s1 += j[i]*4**i
