@@ -105,73 +105,73 @@ def portafolio_sim(precio,sit,Ud):
         
         Vp[t],X[t+1]=portafolio(X[t],u[t],precio[t],rcom)
     
-#    return T,Vp,X,u # para graficar 
-    return Vp # para optimizar en genético. 
+    return T,Vp,X,u # para graficar 
+#    return Vp # para optimizar en genético. 
 
 #%% para optimizar
-def portafolios_sim(data,sit,Ud):
-    Sim = np.zeros((len(data),len(sit[0])))
-    for i in range(len(data)):
-        Sim[i] = portafolio_sim(data[i].Close[-len(sit[0]):],sit[i],Ud)
-        
-    return(Sim)
+#def portafolios_sim(data,sit,Ud):
+#    Sim = np.zeros((len(data),len(sit[0])))
+#    for i in range(len(data)):
+#        Sim[i] = portafolio_sim(data[i].Close[-len(sit[0]):],sit[i],Ud)
+#        
+#    return(Sim)
 #    
 #%% para graficar
     
-#def portafolios_sim(data,sit,Ud):
-#    Sim = []
-#    for i in range(len(data)):
-#        Sim.append(portafolio_sim(data[i].Close[-len(sit[0]):],sit[i],Ud))
-#        
-#    return(np.array(Sim))
+def portafolios_sim(data,sit,Ud):
+    Sim = []
+    for i in range(len(data)):
+        Sim.append(portafolio_sim(data[i].Close[-len(sit[0]):],sit[i],Ud))
+        
+    return(np.array(Sim))
     
 #%% Ejecucion de la funcion de simulacion
     
 ndata = 4**cont
 #Ud = np.random.randint(-1,2,ndata)
-Ud = [ 0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  1.,  0.,  1.,  1.,  0.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  0., -1.,  1.,  0.,  0.,  0.,  0.,  1.,
-        0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0., -1.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,
-        1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  0.,  0., -1.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0.,  0.,  0.,
-       -1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  0.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,
-        0.,  0.,  0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0., -1.,  1.,  0., -1., -1.,  0.,  0.,  0.,  0.,
-        0.,  1.,  0.,  0.,  0., -1.,  0.,  0., -1.,  0.,  0., -1., -1.,
-        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-        0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
-        0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,
-        0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.] # Anterior máximo. Considera únicamente valor final y no cambios porcentuales.
+#Ud = [ 0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  1.,  0.,  1.,  1.,  0.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  0., -1.,  1.,  0.,  0.,  0.,  0.,  1.,
+#        0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0., -1.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,
+#        1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  0.,  0., -1.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0.,  0.,  0.,
+#       -1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  0.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,
+#        0.,  0.,  0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0., -1.,  1.,  0., -1., -1.,  0.,  0.,  0.,  0.,
+#        0.,  1.,  0.,  0.,  0., -1.,  0.,  0., -1.,  0.,  0., -1., -1.,
+#        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+#        0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+#        0.,  0.,  0.,  0.,  0., -1.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,
+#        0.,  0.,  0.,  0.,  0.,  0.,  0., -1.,  0.] # Anterior máximo. Considera únicamente valor final y no cambios porcentuales.
 
-#Ud = m0 # resultantedespues de un caso representativo del genético
+Ud = m0 # resultantedespues de un caso representativo del genético
 
 Sim = portafolios_sim(data,sit,Ud)
 
 #%% Grafica los resultados
-#for i in range(len(Sim)): 
-#    plt.figure(figsize=(8,6))
-#    plt.subplot(3,1,1)
-#    plt.plot(Sim[i][0],data[i].Close[-len(sit[0]):])
-#    plt.ylabel('p(t)')
-#    plt.grid()
-#    
-#    plt.subplot(3,1,2)
-#    plt.plot(Sim[i][0],Sim[i][1])
-#    plt.ylabel('vp(t)')
-#    plt.xlabel('time')
-#    plt.grid()
-#    
-#    plt.subplot(3,1,3)
-#    plt.plot(Sim[i][0],Sim[i][3])
-#    plt.ylabel('u(t)')
-#    plt.grid()
-#    plt.show()
+for i in range(len(Sim)): 
+    plt.figure(figsize=(8,6))
+    plt.subplot(3,1,1)
+    plt.plot(Sim[i][0],data[i].Close[-len(sit[0]):])
+    plt.ylabel('p(t)')
+    plt.grid()
+    
+    plt.subplot(3,1,2)
+    plt.plot(Sim[i][0],Sim[i][1])
+    plt.ylabel('vp(t)')
+    plt.xlabel('time')
+    plt.grid()
+    
+    plt.subplot(3,1,3)
+    plt.plot(Sim[i][0],Sim[i][3])
+    plt.ylabel('u(t)')
+    plt.grid()
+    plt.show()
 
 print(time()-t1)

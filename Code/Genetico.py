@@ -17,9 +17,10 @@ l_dec = 64 #Cantidad de vectores de toma de decisiones     *** en potencias de 2
 
 decisiones = np.random.randint(-1,2,(l_dec,l_vec)) # Inicial. 
 
-iteraciones = 550
-hist = np.zeros((iteraciones,l_dec//4)) # no se sobre-escribe
+iteraciones = 300
 
+hist = np.zeros((iteraciones,l_dec//4)) # no se sobre-escribe
+m_hist = []
 
 p = np.zeros(l_dec//4) # calificaciones padres, se sobre-escribe en cada ciclo
 a = np.zeros(l_dec//4*5) # puntuaciones de hijos, se sobre-escribe en cada ciclo
@@ -55,16 +56,23 @@ for cic in range(iteraciones):
         for i in range(int(l_vec//4)):
             decisiones[k][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
         
+        
+        
+        
     print(np.ceil((1+cic)/iteraciones*1000)/10)
 
-    pickle.dump(m,hist,open('tmp.sav','wb'))
 
+    if cic % 10 == 0: 
+        m_hist.append(m)
+        
+    pickle.dump([m,hist,m_hist],open('tmp.sav','wb'))
+    
 print(m, time()-t1)
 
-pickle.dump([p,a,m,hist],open('genetico.sav','wb')) # guarda las variables más importantes al finalizar. 
+pickle.dump([p,a,m,hist,m_hist],open('genetico.sav','wb')) # guarda las variables más importantes al finalizar. 
 
 #%% para abrir el .sav
-[p,a,m,hist] = pickle.load(open('genetico.sav','rb'))
+[p,a,m,hist,m_hist] = pickle.load(open('genetico.sav','rb'))
 
 #%% generar un vector de toma de decisiones representativo. 
 
