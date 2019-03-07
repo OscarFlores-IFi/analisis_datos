@@ -118,7 +118,8 @@ def portafolio_sim(precio,sit,Ud):
         
         Vp[t],X[t+1]=portafolio(X[t],u[t],precio[t],rcom)
     
-    return T,Vp,X,u
+#    return T,Vp,X,u
+    return Vp
 
 #%% Ejecucion de la funcion de simulacion
 ndata = 4**cont
@@ -141,24 +142,25 @@ precio = data.Close[-len(sit):]
 #       -1, -1,  1, -1,  1,  1,  0,  0, -1, -1, -1, -1,  0, -1,  0, -1,  0,
 #        1]
 Ud = m0
-T,Vp,X,u = portafolio_sim(precio,sit,Ud)
+Vp = portafolio_sim(precio,sit,Ud)
+#T,Vp,X,u = portafolio_sim(precio,sit,Ud)
 #%% 
-plt.figure(figsize=(8,6))
-plt.subplot(3,1,1)
-plt.plot(T,precio)
-plt.ylabel('p(t)')
-plt.grid()
-
-plt.subplot(3,1,2)
-plt.plot( T,Vp)
-plt.ylabel('vp(t)')
-plt.xlabel('time')
-plt.grid()
-
-plt.subplot(3,1,3)
-plt.plot( T,u)
-plt.ylabel('u(t)')
-plt.grid()
-plt.show()
+#plt.figure(figsize=(8,6))
+#plt.subplot(3,1,1)
+#plt.plot(T,precio)
+#plt.ylabel('p(t)')
+#plt.grid()
+#
+#plt.subplot(3,1,2)
+#plt.plot( T,Vp)
+#plt.ylabel('vp(t)')
+#plt.xlabel('time')
+#plt.grid()
+#
+#plt.subplot(3,1,3)
+#plt.plot( T,u)
+#plt.ylabel('u(t)')
+#plt.grid()
+#plt.show()
 
 print(time()-t1)
