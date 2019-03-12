@@ -19,7 +19,7 @@ data = []
 t1 = time()
 
 for i in csv: 
-    data.append(pd.read_csv('../Data/%s.csv'%i, index_col='0'))
+    data.append(pd.read_csv('../Data/%s.MX.csv'%i, index_col=0))
 #    data.append(pd.read_csv('Data/%s.csv'%i, index_col=0))
     
 #%%
