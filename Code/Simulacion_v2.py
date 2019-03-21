@@ -15,9 +15,10 @@ import pickle
 
 
 #%%
+archivo = 'WALMEXn'
 
 t1 = time()
-data = pd.read_csv('../Data/WALMEX_n.csv', index_col=0)
+data = pd.read_csv('../Data/'+archivo+'.csv', index_col=0)
 #%%
 def crear_ventanas(data,n_ventana):
     n_data = len(data)

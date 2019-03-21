@@ -19,7 +19,7 @@ data = []
 t1 = time()
 
 for i in csv: 
-    data.append(pd.read_csv('../Data/%s.MX.csv'%i, index_col=0))
+    data.append(pd.read_csv('../Data/%sn.csv'%i, index_col=0))
 #    data.append(pd.read_csv('Data/%s.csv'%i, index_col=0))
     
 #%%
@@ -159,12 +159,14 @@ for i in range(len(Sim)):
     plt.figure(figsize=(8,6))
     plt.subplot(3,1,1)
     plt.plot(Sim[i][0],data[i].Close[-len(sit[0]):])
+    plt.vlines(1129,data[i].min(),data[i].max())
     plt.ylabel('p(t)')
     plt.grid()
     
     plt.subplot(3,1,2)
     plt.plot(Sim[i][0],Sim[i][1])
     plt.ylabel('vp(t)')
+    plt.vlines(1129,Sim[i][1].min(),Sim[i][1].max())
     plt.xlabel('time')
     plt.grid()
     
