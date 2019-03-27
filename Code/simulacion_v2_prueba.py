@@ -36,36 +36,10 @@ model_close = pickle.load(open('model_close.sav','rb'))
 # Cargar los datos
 archivo = 'WALMEXn'
 data = pd.read_csv('../Data/'+archivo+'.csv', index_col=0)
-
-# Crear la ventanas para el analisis
+close = data.Close
 ndias = [5,20,40,125]
-vent = []
-for i in ndias:
-    vent.append(mylib.crear_ventanas(data['Close'],i))
 
-
-# Normalizar las ventas
-cont = len(ndias)    
-for i in range(cont):
-    vent[i] = np.transpose((vent[i].transpose()-vent[i].mean(axis=1))/vent[i].std(axis=1))
-    
-# Clasificacion de las ventanas usando el modelo KMeans entrenado
-clasif_close = []
-for i in range(cont):
-    clasif_close.append(model_close[i].predict(vent[i]))
-
-# Elegir el mismo numero de clasificaciones para las diferentes ventanas
-for i in range(cont):
-    clasif_close[i]=clasif_close[i][len(vent[i])-len(vent[-1]):]
-    
-# Crear el ventor de situaciones
-sit = np.zeros(len(clasif_close[0]))
-for i in range(cont):
-    sit += clasif_close[i]*4**i
-
-# Tomar los precios que se utilizaran para la simulacion
-precio = data.Close[-len(sit):]
-
+[precio,sit] = mylib.Sit(close,ndias,model_close)
 #%% Realizar la simulacion de cada padres y el super padre
 # Probar los 16 vectores en una sola acción. 
 # Es requerido haber corrido Simulacion_v2 con return(Vp)
@@ -75,6 +49,80 @@ Vp = np.zeros((n,len(sit)))
 for i in np.arange(len(m)):
     Vp[i,:] = portafolio_sim(precio,sit,m[i])
 Vp_m0 = portafolio_sim(precio,sit,m0)
+
+
+#%%
+def actualización(x0,x1,u,p,rcom):
+    vp = x0+p*x1 #Valor presente del portafolios
+    x0 = x0-p*u-rcom*p*abs(u) #Dinero disponible
+    x1 = x1+u #Acciones disponibles
+    return vp,x0,x1
+    
+#%%    
+def actualizacion_m(precio,sit,m):
+    #m es la matriz de toma de decisiones de (16,256)  
+    
+    nn = len(precio)
+    mm = len(m)
+    M = np.ones(mm)*10
+    
+    T = np.arange(nn)
+        
+    Vp = np.zeros((nn,mm))
+    X0 = np.zeros((nn,mm)) 
+    X1 = np.zeros((nn,mm))
+    u =  np.zeros((nn,mm))
+    X0[0] = 10000
+    rcom = 0.0025
+    
+    
+    
+    u_max = np.floor(X0[0]/((1+rcom)*precio[0])) # Numero maximo de la operacion
+    u_min  = X1[0] # Numero minimo de la operacion
+    
+    ####################################################################
+    #AC (operacion matricial)
+    if m[:,int(sit[0])]>0:
+        u[0] = u_max*Ud[int(sit[t])]
+    else:
+        u[t] = u_min*Ud[int(sit[t])]
+    
+    Vp[t],X[t+1]=mylib.portafolio(X[t],u[t],precio[t],rcom)
+    
+    for t in T[1:]:
+        
+        u_max = np.floor(X[t][0]/((1+rcom)*precio[t])) # Numero maximo de la operacion
+        u_min  = X[t][1] # Numero minimo de la operacion
+        
+        #AC (operacion matricial)
+        if Ud[int(sit[t])]>0:
+            u[t] = u_max*Ud[int(sit[t])]
+        else:
+            u[t] = u_min*Ud[int(sit[t])]
+        
+        Vp[t],X[t+1]=mylib.portafolio(X[t],u[t],precio[t],rcom)
+    
+#    return T,Vp,X,u
+    return Vp
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #%% Realizar la grafica de los resultados de todas las simulaciones
 Fig = plt.figure(figsize=(20,7))
 cmap = plt.cm.plasma # también se puede plt.get_cmap('plasma')
@@ -90,8 +138,9 @@ plt.xlabel('Time (days)')
 plt.ylabel('Vp ($)')
 plt.show()
 
-Fig.savefig('../Data/'+archivo+'.png',bbox_inches='tight')
+#Fig.savefig('../Data/'+archivo+'.png',bbox_inches='tight')
 
+#%%
 
 
 
