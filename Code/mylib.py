@@ -65,7 +65,43 @@ class mylib:
     def crear_ventanas(data,n_ventana):
         import numpy as np
         n_data = len(data)
-        dat_new = np.zeros((n_data-n_ventana+1,n_ventana))
+        dat_new = np.zeros((n_data-n_ventana+1,n_ventana))  
         for k in np.arange(n_ventana):
             dat_new[:,k] = data[k:(n_data-n_ventana+1)+k]
         return dat_new
+    
+    def Sit(close,ndias,model_close):
+        import numpy as np
+        #close es una serie de tiempo de numpy que contiene los precios de cierre de acción deseada. 
+        #ndias es un vector tipo '[5,20,40,125]' que da situaciones de 
+        
+        
+        # Crear la ventanas para el analisis
+        vent = []
+        for i in ndias:
+            vent.append(mylib.crear_ventanas(close,i))
+        
+        
+        # Normalizar las ventas
+        cont = len(ndias)    
+        for i in range(cont):
+            vent[i] = np.transpose((vent[i].transpose()-vent[i].mean(axis=1))/vent[i].std(axis=1))
+            
+        # Clasificacion de las ventanas usando el modelo KMeans entrenado
+        clasif_close = []
+        for i in range(cont):
+            clasif_close.append(model_close[i].predict(vent[i]))
+        
+        # Elegir el mismo numero de clasificaciones para las diferentes ventanas
+        for i in range(cont):
+            clasif_close[i]=clasif_close[i][len(vent[i])-len(vent[-1]):]
+            
+        # Crear el ventor de situaciones
+        sit = np.zeros(len(clasif_close[0]))
+        for i in range(cont):
+            sit += clasif_close[i]*4**i
+        
+        # Tomar los precios que se utilizaran para la simulacion
+        precio = close[-len(sit):]
+        
+        return (precio,sit)
