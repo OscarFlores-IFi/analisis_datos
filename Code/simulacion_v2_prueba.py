@@ -164,6 +164,7 @@ for i in np.arange(n):
 plt.plot(T[-62:],Vsp[-62:]/Vsp[-62], c='k', linewidth=4, label='Super Padre')
 plt.legend(loc=1,bbox_to_anchor=(1.1, 1))
 plt.title(archivo)
+plt.grid()
 plt.xlabel('Time (days)')
 plt.ylabel('Vp ($)')
 plt.show()
