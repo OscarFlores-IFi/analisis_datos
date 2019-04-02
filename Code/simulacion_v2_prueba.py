@@ -51,78 +51,6 @@ for i in np.arange(len(m)):
 Vp_m0 = portafolio_sim(precio,sit,m0)
 
 
-#%%
-def actualización(x0,x1,u,p,rcom):
-    vp = x0+p*x1 #Valor presente del portafolios
-    x0 = x0-p*u-rcom*p*abs(u) #Dinero disponible
-    x1 = x1+u #Acciones disponibles
-    return vp,x0,x1
-    
-#%%    
-def actualizacion_m(precio,sit,m):
-    #m es la matriz de toma de decisiones de (16,256)  
-    
-    nn = len(precio)
-    mm = len(m)
-    M = np.ones(mm)*10
-    
-    T = np.arange(nn)
-        
-    Vp = np.zeros((nn,mm))
-    X0 = np.zeros((nn,mm)) 
-    X1 = np.zeros((nn,mm))
-    u =  np.zeros((nn,mm))
-    X0[0] = 10000
-    rcom = 0.0025
-    
-    
-    
-    u_max = np.floor(X0[0]/((1+rcom)*precio[0])) # Numero maximo de la operacion
-    u_min  = X1[0] # Numero minimo de la operacion
-    
-    ####################################################################
-    #AC (operacion matricial)
-    if m[:,int(sit[0])]>0:
-        u[0] = u_max*Ud[int(sit[t])]
-    else:
-        u[t] = u_min*Ud[int(sit[t])]
-    
-    Vp[t],X[t+1]=mylib.portafolio(X[t],u[t],precio[t],rcom)
-    
-    for t in T[1:]:
-        
-        u_max = np.floor(X[t][0]/((1+rcom)*precio[t])) # Numero maximo de la operacion
-        u_min  = X[t][1] # Numero minimo de la operacion
-        
-        #AC (operacion matricial)
-        if Ud[int(sit[t])]>0:
-            u[t] = u_max*Ud[int(sit[t])]
-        else:
-            u[t] = u_min*Ud[int(sit[t])]
-        
-        Vp[t],X[t+1]=mylib.portafolio(X[t],u[t],precio[t],rcom)
-    
-#    return T,Vp,X,u
-    return Vp
-    
-    
-    
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #%% Realizar la grafica de los resultados de todas las simulaciones
 Fig = plt.figure(figsize=(20,7))
 cmap = plt.cm.plasma # también se puede plt.get_cmap('plasma')
@@ -139,6 +67,94 @@ plt.ylabel('Vp ($)')
 plt.show()
 
 #Fig.savefig('../Data/'+archivo+'.png',bbox_inches='tight')
+
+
+#%% MODIFICACION DE ACTUALIZACION SUPER PADRE
+def actualizacion(x0,x1,u,p,rcom):
+    vp = x0+p*x1 #Valor presente del portafolios
+    x0 = x0-p*u-rcom*p*abs(u) #Dinero disponible
+    x1 = x1+u #Acciones disponibles
+    return vp,x0,x1
+    
+#%%    
+#def actualizacion_m(precio,sit,m):
+    #m es la matriz de toma de decisiones de (16,256)  
+    
+nn = len(precio)
+mm = len(m)
+M = np.ones(mm)*10
+
+T = np.arange(nn)
+    
+Vp = np.zeros((nn,mm))
+X0 = np.zeros((nn+1,mm)) 
+X1 = np.zeros((nn+1,mm))
+u =  np.zeros((nn,mm))
+X0[0] = 10000
+
+Vsp = np.zeros(T.shape)
+Xsp  = np.zeros((T.shape[0]+1,2)) 
+usp = np.zeros(T.shape)
+Xsp[0][0] = 10000
+
+rcom = 0.0025
+
+#%%
+
+
+
+for t in T:
+    
+    # Simulacion de todos los padres
+    u_max = np.floor(X0[t]/((1+rcom)*precio[t])) # Numero maximo de la operacion
+    u_min  = X1[t] # Numero minimo de la operacion
+    
+    
+    idx = m[:,int(sit[t])]>0
+    u[t,idx] = u_max[idx]*m[idx,int(sit[t])]
+    u[t,~idx] = u_min[~idx]*m[~idx,int(sit[t])]
+    
+    
+    Vp[t],X0[t+1],X1[t+1]=actualizacion(X0[t],X1[t],u[t],precio[t],rcom)
+    
+    ####################################################################
+    #Simulacion super padre
+    usp_max = np.floor(Xsp[t][0]/((1+rcom)*precio[t])) # Numero maximo de la operacion
+    usp_min  = Xsp[t][1] # Numero minimo de la operacion
+    Ud = np.sum((M/np.sum(M))*m[:,int(sit[t])])
+    if np.abs(Ud)<=lim:
+        usp[t] = 0
+    elif Ud<-lim:
+        usp[t]=-usp_min
+    else:
+        usp[t]=usp_max
+    
+    Vsp[t],Xsp[t+1]=mylib.portafolio(Xsp[t],usp[t],precio[t],rcom)
+
+#%%
+plt.plot(T,Vp)
+plt.plot(T,Vsp,'k-',linewidth=4,label='Super padre')
+plt.show()
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #%%
 
