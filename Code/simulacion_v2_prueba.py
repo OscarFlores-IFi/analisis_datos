@@ -34,7 +34,7 @@ model_close = pickle.load(open('model_close.sav','rb'))
 #%% Cargar datos y calcular las situaciones del archivo deseado
 
 # Cargar los datos
-archivo = 'WALMEXn'
+archivo = 'ACn'
 data = pd.read_csv('../Data/'+archivo+'.csv', index_col=0)
 close = data.Close
 ndias = [5,20,40,125]
@@ -78,31 +78,28 @@ def actualizacion(x0,x1,u,p,rcom):
     
 #%%    
 #def actualizacion_m(precio,sit,m):
-    #m es la matriz de toma de decisiones de (16,256)  
     
 nn = len(precio)
 mm = len(m)
-M = np.ones(mm)*10
+#M = np.ones(mm)*10 # Vector de ponderación de padres inicializado en 10 
+M = np.zeros(mm)
 
 T = np.arange(nn)
     
-Vp = np.zeros((nn,mm))
-X0 = np.zeros((nn+1,mm)) 
-X1 = np.zeros((nn+1,mm))
-u =  np.zeros((nn,mm))
-X0[0] = 10000
+Vp = np.zeros((nn,mm)) # valor presente de cada padre
+X0 = np.zeros((nn+1,mm)) # dinero de cada padre
+X1 = np.zeros((nn+1,mm)) # acciones de cada padre
+u =  np.zeros((nn,mm)) # actividad (compra/venta) de cada padre
+X0[0] = 10000 # todos los padres inician con 10000
 
-Vsp = np.zeros(T.shape)
-Xsp  = np.zeros((T.shape[0]+1,2)) 
-usp = np.zeros(T.shape)
-Xsp[0][0] = 10000
+Vsp = np.zeros(T.shape) # valor presente de super padre
+Xsp  = np.zeros((T.shape[0]+1,2)) # dinero y acciones de super padre
+usp = np.zeros(T.shape) #actividad (compra/venta) de super padre
+Xsp[0][0] = 10000 # super padre inicia con 10000
 
-rcom = 0.0025
+rcom = 0.0025 # comisión
 
 #%%
-
-
-
 for t in T:
     
     # Simulacion de todos los padres
@@ -116,9 +113,9 @@ for t in T:
     
     
     Vp[t],X0[t+1],X1[t+1]=actualizacion(X0[t],X1[t],u[t],precio[t],rcom)
-    
-    ####################################################################
-    #Simulacion super padre
+
+
+    # Simulacion super padre
     usp_max = np.floor(Xsp[t][0]/((1+rcom)*precio[t])) # Numero maximo de la operacion
     usp_min  = Xsp[t][1] # Numero minimo de la operacion
     Ud = np.sum((M/np.sum(M))*m[:,int(sit[t])])
@@ -130,16 +127,52 @@ for t in T:
         usp[t]=usp_max
     
     Vsp[t],Xsp[t+1]=mylib.portafolio(Xsp[t],usp[t],precio[t],rcom)
-
+    
+    
+    # Actualización de 'M' 
+    try: 
+#        M[Vp[t]-Vp[t-1] > 0] = M[Vp[t]-Vp[t-1] > 0] + 1 # sumando 1 en todo momento 
+        
+        # Sumando el cambio porcentual a aquellos que tienen rendimientos positivos. 
+        M[Vp[t]-Vp[t-1] > 0] = M[Vp[t]-Vp[t-1] > 0] + ((Vp[t]-Vp[t-1])/Vp[t])[(Vp[t]-Vp[t-1])/Vp[t]>0]
+    except:
+        pass
+    
 #%%
-plt.plot(T,Vp)
-plt.plot(T,Vsp,'k-',linewidth=4,label='Super padre')
+plt.figure(figsize=(20,7))
+cmap = plt.cm.plasma # también se puede plt.get_cmap('plasma')
+colors = cmap(np.linspace(0,1,n))
+for i in np.arange(n):
+    plt.plot(Vp[:,i], c=colors[i,:],label='padre%d'%i)
+plt.plot(Vsp, c='k', linewidth=4, label='Super Padre')
+plt.legend(loc=1,bbox_to_anchor=(1.1, 1))
+plt.vlines(1129,Vp.min(),Vp.max())
+plt.xlim(0,len(Vp_m0))
+plt.title(archivo)
+plt.xlabel('Time (days)')
+plt.ylabel('Vp ($)')
 plt.show()
-    
-    
-    
-    
-    
+
+
+
+ultimos = 62
+plt.figure(figsize=(20,7))
+cmap = plt.cm.plasma # también se puede plt.get_cmap('plasma')
+colors = cmap(np.linspace(0,1,n))
+for i in np.arange(n):
+    plt.plot(T[-62:],Vp[-62:,i]/Vp[-62,i], c=colors[i,:],label='padre%d'%i)
+plt.plot(T[-62:],Vsp[-62:]/Vsp[-62], c='k', linewidth=4, label='Super Padre')
+plt.legend(loc=1,bbox_to_anchor=(1.1, 1))
+plt.title(archivo)
+plt.grid()
+plt.xlabel('Time (days)')
+plt.ylabel('Vp ($)')
+plt.show()
+
+
+
+
+
 
 
 
