@@ -10,21 +10,30 @@ import pickle
 t1 = time()
 
 
-l_vec = 256 #longitud del vector de toma de decisiones
+l_vec = np.int(np.max(sit))+1 #longitud del vector de toma de decisiones
 l_dec = 64 #Cantidad de vectores de toma de decisiones     *** en potencias de 2 (2**n) ***
 
 #### Se otorgan 3 opciones a la toma de decisiones
 
 decisiones = np.random.randint(-1,2,(l_dec,l_vec)) # Inicial. 
+iteraciones = 500
 
-iteraciones = 300
 
-hist = np.zeros((iteraciones,l_dec//4)) # no se sobre-escribe
+
+hist_m = np.zeros((iteraciones,l_dec//4*5)) # historial de media
+hist_s = np.zeros((iteraciones,l_dec//4*5)) # historial de desviación estandar
+hist_a = np.zeros((iteraciones,l_dec//4*5)) # historial de calificaciones
 m_hist = []
 
 p = np.zeros(l_dec//4) # calificaciones padres, se sobre-escribe en cada ciclo
 a = np.zeros(l_dec//4*5) # puntuaciones de hijos, se sobre-escribe en cada ciclo
 m = np.zeros((l_dec//4,l_vec)) # padres, se sobre-escribe en cada ciclo
+
+#Para castigar y premiar baja desviación de rendimientos. 
+C = 1/10 # Multiplicador arbitrario de castigo por desviación estándar. 
+pct_mean = np.zeros(a.shape)
+pct_std = np.zeros(a.shape)
+
 
 for cic in range(iteraciones):
     
@@ -40,17 +49,30 @@ for cic in range(iteraciones):
         #######################################################################
         Sim = portafolios_sim(data,sit,decisiones[i]) #########################
         pct = Sim[:,1:]/Sim[:,:-1]-1 ##########################################
-        a[i] = pct.mean() ##################################################### todas las empresas
+        pct_mean[i] = pct.mean() ########################################## todas las empresas
+        pct_std[i] = pct.std() ############################################
         #######################################################################
-        
-        
+    
+    # Se da una calificación a cada vector de toma de decisiones.
+    pmr = pct_mean # pct_mean no estandarizado se respalda
+    psr = pct_std # pct_std no estandarizado se respalda
+    pct_mean = (pct_mean-pct_mean.mean())/pct_mean.std() # pct_mean estandarizado 
+    pct_std = (pct_std-pct_std.mean())/pct_std.std() # pct_std estandarizado
+    a = pct_mean-pct_std*C # Se le da una calificación 
+    
+    # Se escogen los padres.
     decisiones = np.concatenate((decisiones,m)) # agregamos los 'padres' de las nuevas generaciones a la lista. 
-    a[-int(l_dec//4):] = p # se juntan las puntuaciones de los hijos con la de los padres
     m = decisiones[np.argsort(a)[-int(l_dec//4):]] # se escojen los padres
-    p = np.sort(a)[-int(l_dec//4):] # se guardan las calificaciones de los nuevos padres  
+    pct_mean[-int(l_dec//4):] = pmr[np.argsort(a)[-int(l_dec//4):]] # se guarda la media que obtuvieron los padres  
+    pct_std[-int(l_dec//4):] = psr[np.argsort(a)[-int(l_dec//4):]] # se guarda la desviación que obtuvieron los padres 
     
-    hist[cic,:] = p #se almacena el promedio de los padres para observar avance generacional
     
+    hist_m[cic,:] = pmr #se almacena el promedio de los padres para observar avance generacional
+    hist_s[cic,:] = psr
+    hist_a[cic,:] = a
+    
+    
+    # Se mutan los vectores de toma de decisiones
     decisiones = np.array([[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(l_dec)])
     for k in range(l_dec): ## mutamos la cuarta parte de los dígitos de los l_dec vectores que tenemos. 
         for i in range(int(l_vec//4)):
@@ -58,21 +80,20 @@ for cic in range(iteraciones):
         
         
         
-        
+    # Para imprimir el proceso del algoritmo genérico en relación al total por simular.    
     print(np.ceil((1+cic)/iteraciones*1000)/10)
 
-
+    # Cada 10 iteraciones se guardan los resultados de las simulaciones en un respaldo. 
     if cic % 10 == 0: 
         m_hist.append(m)
-        
-    pickle.dump([m,hist,m_hist],open('tmp.sav','wb'))
+        pickle.dump([m,hist_m,hist_s,hist_a,m_hist],open('tmp.sav','wb'))
     
 print(m, time()-t1)
 
-pickle.dump([p,a,m,hist,m_hist],open('genetico.sav','wb')) # guarda las variables más importantes al finalizar. 
+pickle.dump([p,a,m,hist_m,hist_s,hist_a,m_hist],open('genetico3.sav','wb')) # guarda las variables más importantes al finalizar. 
 
 #%% para abrir el .sav
-[p,a,m,hist,m_hist] = pickle.load(open('genetico.sav','rb'))
+[p,a,m,hist_m,hist_s,hist_a,m_hist] = pickle.load(open('genetico3.sav','rb'))
 
 #%% generar un vector de toma de decisiones representativo. 
 
