@@ -30,16 +30,40 @@ m0[m0>lim] = 1
 # Cargar el modelo de clasificacion (KMeans) ya enetrenado
 model_close = pickle.load(open('model_close.sav','rb'))
 
+#%% Imagen 1 articulo
+fig = plt.figure()
+plt.plot(hist)
+plt.xlabel('Iteration')
+plt.ylabel('Cost function')
+plt.title('Genetic algorithm evolution')
+fig.savefig('GA_evolution.png',bbox_inches='tight')
+plt.show()
+
 
 #%% Cargar datos y calcular las situaciones del archivo deseado
 
 # Cargar los datos
-archivo = 'ACn'
+archivo = 'WALMEXn'
 data = pd.read_csv('../Data/'+archivo+'.csv', index_col=0)
 close = data.Close
 ndias = [5,20,40,125]
 
 [precio,sit] = mylib.Sit(close,ndias,model_close)
+
+
+#%%
+I,J = len(model_close),len(model_close[0].cluster_centers_)
+fig = plt.figure(figsize=(6,14))
+fig.subplots_adjust(hspace=.8, wspace=0.8)
+
+for i in range(I):
+    for j in range(J):
+        plt.subplot(8,2,(i*I**0 + j*J**1)+1)
+        plt.plot(model_close[j].cluster_centers_[i])
+        plt.ylabel('Cluster %d'%i)
+        plt.xlabel('%d Days'% ndias[j])
+fig.savefig('K_means_cluster.png',bbox_inches='tight')
+plt.show()
 #%% Realizar la simulacion de cada padres y el super padre
 # Probar los 16 vectores en una sola acción. 
 # Es requerido haber corrido Simulacion_v2 con return(Vp)
@@ -74,7 +98,8 @@ def actualizacion(x0,x1,u,p,rcom):
     vp = x0+p*x1 #Valor presente del portafolios
     x0 = x0-p*u-rcom*p*abs(u) #Dinero disponible
     x1 = x1+u #Acciones disponibles
-    return vp,x0,x1
+    xcom = rcom*p*abs(u)
+    return vp,x0,x1,xcom
     
 #%%    
 #def actualizacion_m(precio,sit,m):
@@ -89,6 +114,7 @@ T = np.arange(nn)
 Vp = np.zeros((nn,mm)) # valor presente de cada padre
 X0 = np.zeros((nn+1,mm)) # dinero de cada padre
 X1 = np.zeros((nn+1,mm)) # acciones de cada padre
+Xcom = np.zeros((nn+1,mm)) # comisiones por operacion
 u =  np.zeros((nn,mm)) # actividad (compra/venta) de cada padre
 X0[0] = 10000 # todos los padres inician con 10000
 
@@ -97,9 +123,10 @@ Xsp  = np.zeros((T.shape[0]+1,2)) # dinero y acciones de super padre
 usp = np.zeros(T.shape) #actividad (compra/venta) de super padre
 Xsp[0][0] = 10000 # super padre inicia con 10000
 
+
 rcom = 0.0025 # comisión
 
-#%%
+#%
 for t in T:
     
     # Simulacion de todos los padres
@@ -112,7 +139,7 @@ for t in T:
     u[t,~idx] = u_min[~idx]*m[~idx,int(sit[t])]
     
     
-    Vp[t],X0[t+1],X1[t+1]=actualizacion(X0[t],X1[t],u[t],precio[t],rcom)
+    Vp[t],X0[t+1],X1[t+1],Xcom[t]=actualizacion(X0[t],X1[t],u[t],precio[t],rcom)
 
 
     # Simulacion super padre
@@ -133,19 +160,27 @@ for t in T:
     try: 
 #        M[Vp[t]-Vp[t-1] > 0] = M[Vp[t]-Vp[t-1] > 0] + 1 # sumando 1 en todo momento 
         
+        M = M + (Vp[t]-Vp[t-1])/np.abs(Vp[t]-Vp[t-1])
+        M[M<0] = 0
+        
         # Sumando el cambio porcentual a aquellos que tienen rendimientos positivos. 
-        M[Vp[t]-Vp[t-1] > 0] = M[Vp[t]-Vp[t-1] > 0] + ((Vp[t]-Vp[t-1])/Vp[t])[(Vp[t]-Vp[t-1])/Vp[t]>0]
+#        M[Vp[t]-Vp[t-1] > 0] = M[Vp[t]-Vp[t-1] > 0] + ((Vp[t]-Vp[t-1])/Vp[t])[(Vp[t]-Vp[t-1])/Vp[t]>0]
+        
+#        M = M + ((Vp[t]-Vp[t-1])/Vp[t])
+#        M[M<0] = 0
     except:
         pass
-    
+#%% Calculo de las comusiones totales    
+Xcomt = Xcom.sum(axis=0)
+
 #%%
-plt.figure(figsize=(20,7))
+plt.figure(figsize=(10,4))
 cmap = plt.cm.plasma # también se puede plt.get_cmap('plasma')
 colors = cmap(np.linspace(0,1,n))
 for i in np.arange(n):
-    plt.plot(Vp[:,i], c=colors[i,:],label='padre%d'%i)
-plt.plot(Vsp, c='k', linewidth=4, label='Super Padre')
-plt.legend(loc=1,bbox_to_anchor=(1.1, 1))
+    plt.plot(Vp[:,i], c=colors[i,:],label='Father %d'%i)
+plt.plot(Vsp, c='k', linewidth=4, label='Avg Father')
+plt.legend(loc=1,bbox_to_anchor=(1.25, 1))
 plt.vlines(1129,Vp.min(),Vp.max())
 plt.xlim(0,len(Vp_m0))
 plt.title(archivo)
@@ -154,22 +189,31 @@ plt.ylabel('Vp ($)')
 plt.show()
 
 
-
 ultimos = 62
-plt.figure(figsize=(20,7))
+fig1 = plt.figure(figsize=(20,4))
 cmap = plt.cm.plasma # también se puede plt.get_cmap('plasma')
 colors = cmap(np.linspace(0,1,n))
 for i in np.arange(n):
-    plt.plot(T[-62:],Vp[-62:,i]/Vp[-62,i], c=colors[i,:],label='padre%d'%i)
-plt.plot(T[-62:],Vsp[-62:]/Vsp[-62], c='k', linewidth=4, label='Super Padre')
-plt.legend(loc=1,bbox_to_anchor=(1.1, 1))
+    plt.plot(T[-62:],Vp[-62:,i]/Vp[-62,i], c=colors[i,:],label='Father %d'%i)
+plt.plot(T[-62:],Vsp[-62:]/Vsp[-62], c='k', linewidth=4, label='Avg Father')
+plt.legend(loc=1,bbox_to_anchor=(1.2, 1))
 plt.title(archivo)
 plt.grid()
 plt.xlabel('Time (days)')
 plt.ylabel('Vp ($)')
 plt.show()
 
+#%%
+I,J = len(model_close),len(model_close[0].cluster_centers_)
+fig = plt.figure(figsize=(10,7))
+fig.subplots_adjust(hspace=.8, wspace=0.8)
 
+for i in range(I):
+    for j in range(J):
+        plt.subplot(I,J,(i*I*0 + j*J*1)+1)
+        plt.plot(model_close[i].cluster_centers_[j])
+        plt.ylabel('Patterns')
+        plt.xlabel('Days')
 
 
 
