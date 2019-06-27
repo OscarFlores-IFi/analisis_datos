@@ -41,7 +41,6 @@ class Optimizacion:
             
             Vp[t],X[t+1]=portafolio(X[t],u[t],precio[t],rcom)
         
-    #    return T,Vp,X,u
         return Vp
     
     def portafolios_sim(data,sit,Ud):
@@ -116,6 +115,14 @@ class Optimizacion:
     
 
 class Graficos: 
+    def crear_ventanas(data,n_ventana):
+        import numpy as np
+        n_data = len(data)
+        dat_new = np.zeros((n_data-n_ventana+1,n_ventana))
+        for k in np.arange(n_ventana):
+            dat_new[:,k] = data[k:(n_data-n_ventana+1)+k]
+        return dat_new
+
     def portafolio(x,u,p,rcom):
         x_1 = x;
         vp = x[0]+p*x[1] #Valor presente del portafolios
@@ -151,4 +158,92 @@ class Graficos:
             Vp[t],X[t+1]=portafolio(X[t],u[t],precio[t],rcom)
         
         return T,Vp,X,u
-#        return Vp
+
+    def portafolios_sim(data,sit,Ud):
+        import numpy as np
+        from Simulacion import Graficos
+        portafolio_sim = Graficos.portafolio_sim
+        
+        Sim = []
+        for i in range(len(data)):
+            Sim.append(portafolio_sim(data[i].Close[-len(sit[0]):],sit[i],Ud))
+            
+        return(np.array(Sim))
+    
+    def simulacion(csv,ndias,model_close,Ud): 
+        import numpy as np
+        import pandas as pd
+        from Simulacion import Graficos
+        import matplotlib.pyplot as plt
+        portafolios_sim = Graficos.portafolios_sim
+        crear_ventanas = Graficos.crear_ventanas
+
+        
+        # Cargamos bases de datos en .csv
+        data = []
+        for i in csv: 
+            data.append(pd.read_csv(i, index_col=0))
+            
+        # Creamos ventanas de tiempo
+        vent = []
+        for j in data: 
+            ven = []
+            for i in ndias:
+                ven.append(crear_ventanas(j['Close'],i))  # IMPORTANTE!! Se asume que las bases de datos siempre recibiran el nombre de una columna 'Close'
+            vent.append(ven)
+    
+        # Se estandarizan los datos
+        cont = len(ndias)    
+        norm = []
+        for j in vent:
+            for i in range(cont):
+                j[i] = np.transpose((j[i].transpose()-j[i].mean(axis=1))/j[i].std(axis=1))
+            norm.append(j)
+            
+        # Se clasifica la situación de los precios en cada cluster de k-means.
+        clasif_close = []
+        for norm in norm:
+            tmp = []
+            for i in range(cont):
+                tmp.append(model_close[i].predict(norm[i]))
+            clasif_close.append(tmp)   
+            
+        # Cortar la longitud de las clasificaciones para que tengan la misma longitud
+        for j in clasif_close:
+            for i in range(cont):
+                j[i]=j[i][len(norm[0][i])-len(vent[0][-1]):]
+            
+        # Situación de cada t en T.
+        sit = []
+        for j in clasif_close:
+            s1 = np.zeros(len(j[0]))
+            for i in range(cont):
+                s1 += j[i]*2**i
+            sit.append(s1)
+    
+        # Simulamos
+        Sim = portafolios_sim(data,sit,Ud)
+     
+        
+        for i in range(len(Sim)): 
+            plt.figure(figsize=(8,6))
+            plt.subplot(3,1,1)
+            plt.plot(Sim[i][0],data[i].Close[-len(sit[0]):])
+        #    plt.vlines(1129,data[i].min(),data[i].max())
+            plt.ylabel('p(t)')
+            plt.grid()
+            
+            plt.subplot(3,1,2)
+            plt.plot(Sim[i][0],Sim[i][1])
+            plt.ylabel('vp(t)')
+        #    plt.vlines(1129,Sim[i][1].min(),Sim[i][1].max())
+            plt.xlabel('time')
+            plt.grid()
+            
+            plt.subplot(3,1,3)
+            plt.plot(Sim[i][0],Sim[i][3])
+            plt.ylabel('u(t)')
+            plt.grid()
+            plt.show()
+ 
+        return(Sim)
