@@ -11,23 +11,23 @@ t1 = time()
 
 
 l_vec = np.int(np.max(sit))+1 #longitud del vector de toma de decisiones
-l_dec = 64 #Cantidad de vectores de toma de decisiones     *** en potencias de 2 (2**n) ***
+n_vec = 64 #Cantidad de vectores de toma de decisiones     *** en potencias de 2 (2**n) ***
 
 #### Se otorgan 3 opciones a la toma de decisiones
 
-decisiones = np.random.randint(-1,2,(l_dec,l_vec)) # Inicial. 
+decisiones = np.random.randint(-1,2,(n_vec,l_vec)) # Inicial. 
 iteraciones = 500
 
 
 
-hist_m = np.zeros((iteraciones,l_dec//4*5)) # historial de media
-hist_s = np.zeros((iteraciones,l_dec//4*5)) # historial de desviación estandar
-hist_a = np.zeros((iteraciones,l_dec//4*5)) # historial de calificaciones
+hist_m = np.zeros((iteraciones,n_vec//4*5)) # historial de media
+hist_s = np.zeros((iteraciones,n_vec//4*5)) # historial de desviación estandar
+hist_a = np.zeros((iteraciones,n_vec//4*5)) # historial de calificaciones
 m_hist = []
 
-p = np.zeros(l_dec//4) # calificaciones padres, se sobre-escribe en cada ciclo
-a = np.zeros(l_dec//4*5) # puntuaciones de hijos, se sobre-escribe en cada ciclo
-m = np.zeros((l_dec//4,l_vec)) # padres, se sobre-escribe en cada ciclo
+p = np.zeros(n_vec//4) # calificaciones padres, se sobre-escribe en cada ciclo
+a = np.zeros(n_vec//4*5) # puntuaciones de hijos, se sobre-escribe en cada ciclo
+m = np.zeros((n_vec//4,l_vec)) # padres, se sobre-escribe en cada ciclo
 
 #Para castigar y premiar baja desviación de rendimientos. 
 C = 1/10 # Multiplicador arbitrario de castigo por desviación estándar. 
@@ -37,7 +37,7 @@ pct_std = np.zeros(a.shape)
 
 for cic in range(iteraciones):
     
-    for i in np.arange(l_dec): ## se simulan todos vectores de decisión para escoger el que de la suma mayor
+    for i in np.arange(n_vec): ## se simulan todos vectores de decisión para escoger el que de la suma mayor
         
 #        #######################################################################
 #        T,Vp,X,u = portafolio_sim(precio,sit,decisiones[i]) ###################
@@ -62,9 +62,9 @@ for cic in range(iteraciones):
     
     # Se escogen los padres.
     decisiones = np.concatenate((decisiones,m)) # agregamos los 'padres' de las nuevas generaciones a la lista. 
-    m = decisiones[np.argsort(a)[-int(l_dec//4):]] # se escojen los padres
-    pct_mean[-int(l_dec//4):] = pmr[np.argsort(a)[-int(l_dec//4):]] # se guarda la media que obtuvieron los padres  
-    pct_std[-int(l_dec//4):] = psr[np.argsort(a)[-int(l_dec//4):]] # se guarda la desviación que obtuvieron los padres 
+    m = decisiones[np.argsort(a)[-int(n_vec//4):]] # se escojen los padres
+    pct_mean[-int(n_vec//4):] = pmr[np.argsort(a)[-int(n_vec//4):]] # se guarda la media que obtuvieron los padres  
+    pct_std[-int(n_vec//4):] = psr[np.argsort(a)[-int(n_vec//4):]] # se guarda la desviación que obtuvieron los padres 
     
     
     hist_m[cic,:] = pmr #se almacena el promedio de los padres para observar avance generacional
@@ -73,8 +73,8 @@ for cic in range(iteraciones):
     
     
     # Se mutan los vectores de toma de decisiones
-    decisiones = np.array([[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(l_dec)])
-    for k in range(l_dec): ## mutamos la cuarta parte de los dígitos de los l_dec vectores que tenemos. 
+    decisiones = np.array([[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(n_vec)])
+    for k in range(n_vec): ## mutamos la cuarta parte de los dígitos de los n_vec vectores que tenemos. 
         for i in range(int(l_vec//4)):
             decisiones[k][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
         

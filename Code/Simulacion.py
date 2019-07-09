@@ -1,3 +1,47 @@
+class Kclusters:
+    def k_clusters(csv, ndias, n_clusters, nombre):
+        import pandas as pd
+        import numpy as np
+        import pickle 
+        from sklearn.cluster import KMeans
+
+        # csv = ubicación de los csv de datos
+        # ndias = lista de número de días con los cuales se harán los clusters.
+        # n_clusters = número de clusters para hacer la partición de cada una de las matrices de ndias
+        # nombre = el cual tendrá el archivo .sav generado
+
+        data = []
+        for i in csv:
+            data.append(pd.read_csv(i, index_col=0))
+            
+        def crear_ventanas(data,n_ventana):
+            n_data = len(data)
+            dat_new = np.zeros((n_data-n_ventana+1,n_ventana))
+            for k in np.arange(n_ventana):
+                dat_new[:,k] = data[k:(n_data-n_ventana+1)+k]
+            return dat_new
+
+        vent = []
+        for i in ndias:
+            close_v = crear_ventanas(data[0]['Close'],i)
+            for j in range(1,len(data)):
+                close_v = np.concatenate((close_v, crear_ventanas(data[j]['Close'],i)))
+            vent.append(close_v)
+
+        cont = len(ndias)    
+        for i in range(cont):
+            vent[i] = np.transpose((vent[i].transpose()-vent[i].mean(axis=1))/vent[i].std(axis=1))
+        
+        model_close = []
+        for i in range(cont):
+            model_close.append(KMeans(n_clusters=n_clusters,init='k-means++').fit(vent[i]))
+            
+        pickle.dump(model_close,open(nombre+'.sav','wb'))
+        
+        
+
+
+
 class Optimizacion: 
     def crear_ventanas(data,n_ventana):
         import numpy as np
@@ -253,35 +297,35 @@ class Graficos:
 
 
 class Genetico:
-    def genetico(func,csv,ndias,model_close,l_vec,l_dec,iteraciones,C):
+    def genetico(func,csv,ndias,model_close,l_vec,n_vec,iteraciones,C,nombre):
         import numpy as np
         from time import time
+        import pickle
         
         #func = función a optimizar, esta deberá dar los resultados del vector de decisiones en todas las empresas probadas. 
         #args = argumentos de la función a optimizar.
         #l_vec = longitud de vector de toma de decisiones, en potencias de 2
-        #l_dec = cantidad de vectores de toma de decisiones, en potencias de 2.
+        #n_vec = cantidad de vectores de toma de decisiones, en potencias de 2.
         #iteraciones = número de ciclos completos que dará el algorítmo genético.
         #C = multiplicador de castigo por desviación estándar
         
         t1 = time()        
-        decisiones = np.random.randint(-1,2,(l_dec,l_vec)) # Inicial. 
+        decisiones = np.random.randint(-1,2,(n_vec,l_vec)) # Inicial. 
         
-        hist_m = np.zeros((iteraciones,l_dec//4*5)) # historial de media
-        hist_s = np.zeros((iteraciones,l_dec//4*5)) # historial de desviación estandar
-        hist_a = np.zeros((iteraciones,l_dec//4*5)) # historial de calificaciones
+        hist_m = np.zeros((iteraciones,n_vec//4*5)) # historial de media
+        hist_s = np.zeros((iteraciones,n_vec//4*5)) # historial de desviación estandar
+        hist_a = np.zeros((iteraciones,n_vec//4*5)) # historial de calificaciones
         m_hist = []
         
-        p = np.zeros(l_dec//4) # calificaciones padres, se sobre-escribe en cada ciclo
-        a = np.zeros(l_dec//4*5) # puntuaciones de hijos, se sobre-escribe en cada ciclo
-        m = np.zeros((l_dec//4,l_vec)) # padres, se sobre-escribe en cada ciclo
+        a = np.zeros(n_vec//4*5) # puntuaciones de hijos, se sobre-escribe en cada ciclo
+        m = np.zeros((n_vec//4,l_vec)) # padres, se sobre-escribe en cada ciclo
         
         #Para castigar y premiar baja desviación de rendimientos. 
         pct_mean = np.zeros(a.shape)
         pct_std = np.zeros(a.shape)
         
         for cic in range(iteraciones):  
-            for i in np.arange(l_dec): ## se simulan todos vectores de decisión para escoger el que de la suma mayor
+            for i in np.arange(n_vec): ## se simulan todos vectores de decisión para escoger el que de la suma mayor
                 
                 #######################################################################
                 Sim = func(csv,ndias,model_close,decisiones[i]) #########################
@@ -299,17 +343,17 @@ class Genetico:
             
             # Se escogen los padres.
             decisiones = np.concatenate((decisiones,m)) # agregamos los 'padres' de las nuevas generaciones a la lista. 
-            m = decisiones[np.argsort(a)[-int(l_dec//4):]] # se escojen los padres
-            pct_mean[-int(l_dec//4):] = pmr[np.argsort(a)[-int(l_dec//4):]] # se guarda la media que obtuvieron los padres  
-            pct_std[-int(l_dec//4):] = psr[np.argsort(a)[-int(l_dec//4):]] # se guarda la desviación que obtuvieron los padres 
+            m = decisiones[np.argsort(a)[-int(n_vec//4):]] # se escojen los padres
+            pct_mean[-int(n_vec//4):] = pmr[np.argsort(a)[-int(n_vec//4):]] # se guarda la media que obtuvieron los padres  
+            pct_std[-int(n_vec//4):] = psr[np.argsort(a)[-int(n_vec//4):]] # se guarda la desviación que obtuvieron los padres 
             
             hist_m[cic,:] = pmr #se almacena el promedio de los padres para observar avance generacional
             hist_s[cic,:] = psr
             hist_a[cic,:] = a
             
             # Se mutan los vectores de toma de decisiones
-            decisiones = np.array([[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(l_dec)])
-            for k in range(l_dec): ## mutamos la cuarta parte de los dígitos de los l_dec vectores que tenemos. 
+            decisiones = np.array([[np.random.choice(m.T[i]) for i in range(l_vec)] for i in range(n_vec)])
+            for k in range(n_vec): ## mutamos la cuarta parte de los dígitos de los n_vec vectores que tenemos. 
                 for i in range(int(l_vec//4)):
                     decisiones[k][np.random.randint(0,l_vec)] = np.random.randint(0,3)-1
                   
@@ -319,10 +363,13 @@ class Genetico:
             # Cada 10 iteraciones se guardan los resultados de las simulaciones en un respaldo. 
             if cic % 10 == 0: 
                 m_hist.append(m)
-#                pickle.dump([m,hist_m,hist_s,hist_a,m_hist],open('tmp.sav','wb'))
+                pickle.dump([m,hist_m,hist_s,hist_a,m_hist],open('tmp.sav','wb'))
             
-        print(m, time()-t1)
-#        pickle.dump([p,a,m,hist_m,hist_s,hist_a,m_hist],open('genetico3.sav','wb')) # guarda las variables más importantes al finalizar. 
+        print(m)
+        print('tiempo de ejecución en seg.:')
+        print(time()-t1)
+        
+        pickle.dump([p,a,m,hist_m,hist_s,hist_a,m_hist],open(nombre + '.sav','wb')) # guarda las variables más importantes al finalizar. 
         
                 
         
