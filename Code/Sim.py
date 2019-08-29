@@ -86,8 +86,8 @@ n_vec = 16 # cantidad de vectores de toma de decisiones por generacion
 iteraciones = 20
 C = 0 
 nombre = 'prueba'
-#genetico(func,csv,ndias,model_close,l_vec,l_dec,iteraciones,C)
-genetico(optimizacion,csv,ndias,model_close,l_vec,n_vec,iteraciones,C,nombre)
+#####genetico(func,csv,ndias,model_close,l_vec,l_dec,iteraciones,C)
+#genetico(optimizacion,csv,ndias,model_close,l_vec,n_vec,iteraciones,C,nombre)
 
 #%%
 [p,a,m,hist_m,hist_s,hist_a,m_hist] = pickle.load(open(nombre + '.sav','rb'))

@@ -232,11 +232,17 @@ for i in range(I):
 
 
 
-
 #%%
-
-
-
+fig = plt.figure(figsize=(9,6))
+plt.plot(np.arange(len(data['Close'][-150:])),data['Close'][-150:])
+#plt.plot(np.arange(len(data['Close'])),data['Close'])
+#plt.grid()
+plt.vlines([145,130,110,25],[48,50,47,53],[52,54,51,57])
+plt.title(archivo)
+plt.grid()
+plt.xlabel('Days')
+plt.ylabel('P ($)')
+plt.show()
 
 
 
