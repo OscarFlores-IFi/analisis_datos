@@ -28,10 +28,12 @@ class Kclusters:
                 close_v = np.concatenate((close_v, crear_ventanas(data[j]['Close'],i)))
             vent.append(close_v)
 
-        cont = len(ndias)    
+        cont = len(ndias)       
         for i in range(cont):
-            vent[i] = np.transpose((vent[i].transpose()-vent[i].mean(axis=1))/vent[i].std(axis=1))
-        
+            tmp = np.transpose((vent[i].transpose()-vent[i].mean(axis=1))/vent[i].std(axis=1))
+            vent[i] = tmp[np.sum(np.isnan(tmp),axis=1)==0]
+
+ 
         model_close = []
         for i in range(cont):
             model_close.append(KMeans(n_clusters=n_clusters,init='k-means++').fit(vent[i]))
@@ -116,15 +118,18 @@ class Optimizacion:
         for j in data: 
             ven = []
             for i in ndias:
-                ven.append(crear_ventanas(j['Close'],i))  # IMPORTANTE!! Se asume que las bases de datos siempre recibiran el nombre de una columna 'Close'
+                ven.append(crear_ventanas(j['Close'].dropna(),i))  # IMPORTANTE!! Se asume que las bases de datos siempre recibiran el nombre de una columna 'Close'
             vent.append(ven)
     
         # Se estandarizan los datos
         cont = len(ndias)    
-        norm = []
+        norm = []            
         for j in vent:
             for i in range(cont):
-                j[i] = np.transpose((j[i].transpose()-j[i].mean(axis=1))/j[i].std(axis=1))
+                tmp = j[i].std(axis=1)
+                std = np.ones((len(tmp)))
+                std[tmp!=0] = tmp[tmp!=0]
+                j[i] = np.transpose((j[i].transpose()-j[i].mean(axis=1))/std)
             norm.append(j)
             
         # Se clasifica la situación de los precios en cada cluster de k-means.
@@ -233,15 +238,18 @@ class Graficos:
         for j in data: 
             ven = []
             for i in ndias:
-                ven.append(crear_ventanas(j['Close'],i))  # IMPORTANTE!! Se asume que las bases de datos siempre recibiran el nombre de una columna 'Close'
+                ven.append(crear_ventanas(j['Close'].dropna(),i))  # IMPORTANTE!! Se asume que las bases de datos siempre recibiran el nombre de una columna 'Close'
             vent.append(ven)
     
         # Se estandarizan los datos
-        cont = len(ndias)    
+        cont = len(ndias)   
         norm = []
         for j in vent:
             for i in range(cont):
-                j[i] = np.transpose((j[i].transpose()-j[i].mean(axis=1))/j[i].std(axis=1))
+                tmp = j[i].std(axis=1)
+                std = np.ones((len(tmp)))
+                std[tmp!=0] = tmp[tmp!=0]
+                j[i] = np.transpose((j[i].transpose()-j[i].mean(axis=1))/std)
             norm.append(j)
             
         # Se clasifica la situación de los precios en cada cluster de k-means.

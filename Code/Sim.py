@@ -20,74 +20,58 @@ grafico = Graficos.simulacion
 genetico = Genetico.genetico
 k_clusters = Kclusters.k_clusters
 #%%############################################################################
-############################  Crear model_close ###############################
-###############################################################################
+############################  Crear model_close ###############################'ALFAA.MX',
+############################################################################### 
 
 #%% Datos en csv
-csv = ['AC','ALFAA','ALPEKA','ALSEA','ELEKTRA','IENOVA','MEXCHEM','PE&OLES','PINFRA','WALMEX']
+csv = ['AMXL.MX','WALMEX.MX','TLEVISACPO.MX','GMEXICOB.MX','GFNORTEO.MX','CEMEXCPO.MX','PENOLES.MX','GFINBURO.MX','ELEKTRA.MX','BIMBOA.MX','AC.MX','KIMBERA.MX','LABB.MX','LIVEPOL1.MX','ASURB.MX','GAPB.MX','ALPEKA.MX','GRUMAB.MX','ALSEA.MX','GCARSOA1.MX','PINFRA.MX']
 for i in np.arange(len(csv)):
-    csv[i] = '../Data/%sn.csv'%csv[i]
+    csv[i] = '../Data/%s.csv'%csv[i]
 
+#ndias = [3,5,8,13,21,34,55,89,144]
+ndias = [5,20,40,125]
+n_clusters = 4
 #%% Guardamos model_close en model_close3.sav
-ndias = [3,5,8,13,21,34,55,89,144]
-n_clusters = 2
-nombre = 'model_close3'
+nombre = 'model_close1'
+#k_clusters(csv, ndias, n_clusters, nombre)
 
-k_clusters(csv, ndias, n_clusters, nombre)
+#%% Importamos model_close para futuro uso.
+model_close = pickle.load(open('model_close1.sav','rb'))
+
+#%% Se crea vector de toma de decisiones para futuro uso
+Ud = np.random.randint(-1,2,len(model_close)**len(ndias))
 
 #%%############################################################################
 ######################  Simulación para optimización ##########################
 ###############################################################################
 
-#%% Seleccionamos los csv con los datos a simular.
-csv = ['AC','ALFAA','ALPEKA','ALSEA','ELEKTRA','IENOVA','MEXCHEM','PE&OLES','PINFRA','WALMEX']
-for i in np.arange(len(csv)):
-    csv[i] = '../Data/%sn.csv'%csv[i]
 #%% Simulamos
-
-ndias = [3,5,8,13,21,34,55,89,144]
-model_close = pickle.load(open('model_close3.sav','rb'))
-Ud = np.random.randint(-1,2,2**9)
-
-Vp = optimizacion(csv,ndias,model_close,Ud)
-
-
+#Vp = optimizacion(csv,ndias,model_close,Ud)
+Rend =  np.diff(Vp) / Vp[:,:-1] #Rendimientos diarios.
+Port = Rend.mean(axis=0) #Creamos un portafolio con la misma cantidad de dinero en cada activo. 
+Mean = Port.mean()
+Std = Port.std()
+plt.scatter((Std*252)**0.5,Mean*252)
 
 #%%############################################################################
 #########################  Simulación para Graficar ###########################
 ###############################################################################
 
-#%% Seleccionamos los csv con los datos a simular.
-csv = ['AC','ALFAA','ALPEKA','ALSEA','ELEKTRA','IENOVA','MEXCHEM','PE&OLES','PINFRA','WALMEX']
-for i in np.arange(len(csv)):
-    csv[i] = '../Data/%s.csv'%csv[i]
-#%% Simulamos
-
-ndias = [3,5,8,13,21,34,55,89,144]
-model_close = pickle.load(open('model_close3.sav','rb'))
-Ud = np.random.randint(-1,2,2**9)
-
-Sim = grafico(csv,ndias,model_close,Ud)
+#%% graficamos todas las simulaciones
+#Sim = grafico(csv,ndias,model_close,Ud)
 
 #%%############################################################################
 ###################  Optimización por algorigmo genético ######################
 ###############################################################################
 
-#%% Seleccionamos los csv con los datos que serán utilizados para la optimización.
-csv = ['AC','ALFAA','ALPEKA','ALSEA','ELEKTRA','IENOVA','MEXCHEM','PE&OLES','PINFRA','WALMEX']
-for i in np.arange(len(csv)):
-    csv[i] = '../Data/%sn.csv'%csv[i]
 #%% Simulamos
-
-ndias = [3,5,8,13,21,34,55,89,144]
-model_close = pickle.load(open('model_close3.sav','rb'))
 l_vec = 512 # longitud de cada vector de toma de decisiones
 n_vec = 16 # cantidad de vectores de toma de decisiones por generacion
-iteraciones = 20
+iteraciones = 5
 C = 0 
 nombre = 'prueba'
 #####genetico(func,csv,ndias,model_close,l_vec,l_dec,iteraciones,C)
-#genetico(optimizacion,csv,ndias,model_close,l_vec,n_vec,iteraciones,C,nombre)
+genetico(optimizacion,csv,ndias,model_close,l_vec,n_vec,iteraciones,C,nombre)
 
 #%%
 [p,a,m,hist_m,hist_s,hist_a,m_hist] = pickle.load(open(nombre + '.sav','rb'))
