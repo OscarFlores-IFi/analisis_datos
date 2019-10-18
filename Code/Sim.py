@@ -15,7 +15,7 @@ from Simulacion import Genetico
 from Simulacion import Kclusters
 
 
-optimizacion = Optimizacion.simulacion
+simulacion = Optimizacion.simulacion
 grafico = Graficos.simulacion
 genetico = Genetico.genetico
 k_clusters = Kclusters.k_clusters
@@ -46,7 +46,7 @@ Ud = np.random.randint(-1,2,len(model_close)**len(ndias))
 ###############################################################################
 
 #%% Simulamos
-#Vp = optimizacion(csv,ndias,model_close,Ud)
+#Vp = simulacion(csv,ndias,model_close,Ud)
 Rend =  np.diff(Vp) / Vp[:,:-1] #Rendimientos diarios.
 Port = Rend.mean(axis=0) #Creamos un portafolio con la misma cantidad de dinero en cada activo. 
 Mean = Port.mean()
@@ -71,7 +71,7 @@ iteraciones = 5
 C = 0 
 nombre = 'prueba'
 #####genetico(func,csv,ndias,model_close,l_vec,l_dec,iteraciones,C)
-genetico(optimizacion,csv,ndias,model_close,l_vec,n_vec,iteraciones,C,nombre)
+genetico(simulacion,csv,ndias,model_close,l_vec,n_vec,iteraciones,C,nombre)
 
 #%%
 [p,a,m,hist_m,hist_s,hist_a,m_hist] = pickle.load(open(nombre + '.sav','rb'))
